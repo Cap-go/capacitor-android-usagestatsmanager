@@ -1,3 +1,11 @@
+# @capgo/capacitor-social-login
+ <a href="https://capgo.app/"><img src='https://raw.githubusercontent.com/Cap-go/capgo/main/assets/capgo_banner.png' alt='Capgo - Instant updates for capacitor'/></a>
+
+<div align="center">
+  <h2><a href="https://capgo.app/?ref=plugin"> ➡️ Get Instant updates for your App with Capgo 🚀</a></h2>
+  <h2><a href="https://capgo.app/consulting/?ref=plugin"> Fix your annoying bug now, Hire a Capacitor expert 💪</a></h2>
+</div>
+
 # @capgo/capacitor-android-usagestatsmanager
 
 Exposes the Android's UsageStatsManager SDK to Capacitor
@@ -114,6 +122,8 @@ This will always open the settings screen, even if the permission is already gra
 
 Construct a type with a set of properties K of type T
 
-<code>{ [P in K]: T; }</code>
+<code>{
+ [P in K]: T;
+ }</code>
 
 </docgen-api>

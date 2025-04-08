@@ -3,8 +3,13 @@ import { WebPlugin } from '@capacitor/core';
 import type { CapacitorUsageStatsManagerPlugin } from './definitions';
 
 export class CapacitorUsageStatsManagerWeb extends WebPlugin implements CapacitorUsageStatsManagerPlugin {
-  async echo(options: { value: string }): Promise<{ value: string }> {
-    console.log('ECHO', options);
-    return options;
+  isUsageStatsPermissionGranted(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  openUsageStatsSettings(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  queryAndAggregateUsageStats(_options: any): Promise<Record<string, any>> {
+    throw new Error('Method not implemented.');
   }
 }

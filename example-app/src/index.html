@@ -1,32 +1,152 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" class="hydrated">
   <head>
     <meta charset="UTF-8" />
-    <title>Awesome Capacitor App</title>
+    <title>Example Capacitor App</title>
     <meta
       name="viewport"
       content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-
-    <script
-      type="module"
-      src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"
-    ></script>
-    <script
-      nomodule
-      src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.js"
-    ></script>
-
-    <link rel="icon" type="image/x-icon" href="./assets/icon/favicon.ico" />
-    <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./css/style.css" />
-    <meta name="theme-color" content="#31d53d" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        margin: 20px;
+        margin-top: 50px;
+        padding: 0;
+        color: #333;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1, h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+      h2 {
+        font-size: 1.4em;
+        margin-top: 30px;
+      }
+      button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 12px 24px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 10px 10px 10px 0;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+      .button-secondary {
+        background-color: #3498db;
+      }
+      .button-secondary:hover {
+        background-color: #2980b9;
+      }
+      .button-warning {
+        background-color: #e74c3c;
+      }
+      .button-warning:hover {
+        background-color: #c0392b;
+      }
+      #results-container, #permissions-container {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 16px;
+        margin-top: 20px;
+        background-color: #f9f9f9;
+      }
+      .result-item {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+      }
+      .result-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+      }
+      .key {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      .value {
+        font-family: monospace;
+        white-space: pre;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #eee;
+        overflow-x: auto;
+      }
+      .permission-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        margin-left: 10px;
+      }
+      .status-granted {
+        background-color: #dff0d8;
+        color: #3c763d;
+      }
+      .status-denied {
+        background-color: #f2dede;
+        color: #a94442;
+      }
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+    </style>
   </head>
   <body>
-    <capacitor-welcome></capacitor-welcome>
+    <main>
+      <h1>Android Usage Stats Manager Demo</h1>
+      
+      <h2>Permissions</h2>
+      <p>
+        To use the Usage Stats Manager, the app needs permission to access usage statistics.
+        <span id="permission-status-display"></span>
+      </p>
+      
+      <div class="button-group">
+        <button id="checkPermissionBtn" class="button-secondary">Check Permission</button>
+        <button id="openSettingsBtn" class="button-warning">Open Settings</button>
+      </div>
+      
+      <div id="permissions-container">
+        <p id="permission-status">Permission status will appear here after checking.</p>
+      </div>
+      
+      <h2>Usage Statistics</h2>
+      <p>
+        Click the button below to retrieve usage statistics from the Android device.
+        <br>
+        <small>Note: This functionality is only available on Android devices with proper permissions.</small>
+      </p>
+      
+      <button id="getStatsBtn">Get Stats</button>
+      
+      <div id="results-container">
+        <p id="no-results">Results will appear here after clicking the button.</p>
+        <div id="results-list"></div>
+      </div>
+    </main>
 
-    <script src="./js/capacitor-welcome.js" type="module"></script>
+    <script src="./js/example.js" type="module"></script>
   </body>
 </html>

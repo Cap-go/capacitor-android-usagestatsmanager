@@ -10,14 +10,20 @@ public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "CapacitorUsageStatsManagerPlugin"
     public let jsName = "CapacitorUsageStatsManager"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "echo", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "queryAndAggregateUsageStats", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "isUsageStatsPermissionGranted", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "openUsageStatsSettings", returnType: CAPPluginReturnPromise)
     ]
-    private let implementation = CapacitorUsageStatsManager()
-
-    @objc func echo(_ call: CAPPluginCall) {
-        let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
-        ])
+    
+    @objc func queryAndAggregateUsageStats(_ call: CAPPluginCall) {
+        call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
     }
+
+    @objc func isUsageStatsPermissionGranted(_ call: CAPPluginCall) {
+        call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
+    }
+
+    @objc func openUsageStatsSettings(_ call: CAPPluginCall) {
+        call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
+    }    
 }

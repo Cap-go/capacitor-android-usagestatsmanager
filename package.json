@@ -15,7 +15,7 @@
     "Package.swift",
     "CapgoCapacitorAndroidUsagestatsmanager.podspec"
   ],
-  "author": "https://github.com/Cap-go/capacitor-android-usagestatsmanager",
+  "author": "Martin Donadieu <martin@capgo.app>",
   "license": "MIT",
   "repository": {
     "type": "git",

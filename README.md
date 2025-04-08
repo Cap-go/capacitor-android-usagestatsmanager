@@ -2,6 +2,17 @@
 
 Exposes the Android's UsageStatsManager SDK to Capacitor
 
+## Usage
+
+Requires the following permissions in your `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+    tools:ignore="ProtectedPermissions" />
+```
+
+
+
 ## Install
 
 ```bash
@@ -103,6 +114,8 @@ This will always open the settings screen, even if the permission is already gra
 
 Construct a type with a set of properties K of type T
 
-<code>{ [P in K]: T; }</code>
+<code>{
+ [P in K]: T;
+ }</code>
 
 </docgen-api>

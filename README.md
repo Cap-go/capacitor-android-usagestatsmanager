@@ -16,6 +16,8 @@ Requires the following permissions in your `AndroidManifest.xml`:
 ```xml
 <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
     tools:ignore="ProtectedPermissions" />
+<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    tools:ignore="QueryAllPackagesPermission" />
 ```
 
 
@@ -156,6 +158,8 @@ Represents basic information about an installed package.
 
 Construct a type with a set of properties K of type T
 
-<code>{ [P in K]: T; }</code>
+<code>{
+ [P in K]: T;
+ }</code>
 
 </docgen-api>

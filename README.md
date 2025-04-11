@@ -34,6 +34,7 @@ npx cap sync
 * [`queryAndAggregateUsageStats(...)`](#queryandaggregateusagestats)
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
+* [`queryAllPackages()`](#queryallpackages)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -48,9 +49,11 @@ npx cap sync
 queryAndAggregateUsageStats(options: UsageStatsOptions) => Promise<Record<string, UsageStats>>
 ```
 
-| Param         | Type                                                            |
-| ------------- | --------------------------------------------------------------- |
-| **`options`** | <code><a href="#usagestatsoptions">UsageStatsOptions</a></code> |
+Queries and aggregates usage stats for the given options.
+
+| Param         | Type                                                            | Description                  |
+| ------------- | --------------------------------------------------------------- | ---------------------------- |
+| **`options`** | <code><a href="#usagestatsoptions">UsageStatsOptions</a></code> | - The options for the query. |
 
 **Returns:** <code>Promise&lt;<a href="#record">Record</a>&lt;string, <a href="#usagestats">UsageStats</a>&gt;&gt;</code>
 
@@ -62,6 +65,8 @@ queryAndAggregateUsageStats(options: UsageStatsOptions) => Promise<Record<string
 ```typescript
 isUsageStatsPermissionGranted() => Promise<UsageStatsPermissionResult>
 ```
+
+Checks if the usage stats permission is granted.
 
 **Returns:** <code>Promise&lt;<a href="#usagestatspermissionresult">UsageStatsPermissionResult</a>&gt;</code>
 
@@ -81,6 +86,22 @@ This will always open the settings screen, even if the permission is already gra
 --------------------
 
 
+### queryAllPackages()
+
+```typescript
+queryAllPackages() => Promise<{ packages: PackageInfo[]; }>
+```
+
+Queries all installed packages on the device.
+Requires the QUERY_ALL_PACKAGES permission.
+
+**Returns:** <code>Promise&lt;{ packages: PackageInfo[]; }&gt;</code>
+
+**Since:** 1.2.0
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -88,14 +109,14 @@ This will always open the settings screen, even if the permission is already gra
 
 | Prop                                | Type                | Description                                                                                        |
 | ----------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
-| **`firstTimeStamp`**                | <code>number</code> |                                                                                                    |
-| **`lastTimeStamp`**                 | <code>number</code> |                                                                                                    |
+| **`firstTimeStamp`**                | <code>number</code> | The first timestamp of the usage stats.                                                            |
+| **`lastTimeStamp`**                 | <code>number</code> | The last timestamp of the usage stats.                                                             |
 | **`lastTimeForegroundServiceUsed`** | <code>number</code> | Only available on Android Q (API level 29) and above. Will be undefined on lower Android versions. |
-| **`lastTimeUsed`**                  | <code>number</code> |                                                                                                    |
+| **`lastTimeUsed`**                  | <code>number</code> | The last time the app was used.                                                                    |
 | **`lastTimeVisible`**               | <code>number</code> | Only available on Android Q (API level 29) and above. Will be undefined on lower Android versions. |
-| **`packageName`**                   | <code>string</code> |                                                                                                    |
+| **`packageName`**                   | <code>string</code> | The name of the package.                                                                           |
 | **`totalForegroundServiceUsed`**    | <code>number</code> | Only available on Android Q (API level 29) and above. Will be undefined on lower Android versions. |
-| **`totalTimeInForeground`**         | <code>number</code> |                                                                                                    |
+| **`totalTimeInForeground`**         | <code>number</code> | The total time the app was in the foreground.                                                      |
 | **`totalTimeVisible`**              | <code>number</code> | Only available on Android Q (API level 29) and above. Will be undefined on lower Android versions. |
 
 
@@ -112,6 +133,20 @@ This will always open the settings screen, even if the permission is already gra
 | Prop          | Type                 | Description                                    |
 | ------------- | -------------------- | ---------------------------------------------- |
 | **`granted`** | <code>boolean</code> | Whether the usage stats permission is granted. |
+
+
+#### PackageInfo
+
+Represents basic information about an installed package.
+
+| Prop                   | Type                |
+| ---------------------- | ------------------- |
+| **`packageName`**      | <code>string</code> |
+| **`appName`**          | <code>string</code> |
+| **`versionName`**      | <code>string</code> |
+| **`versionCode`**      | <code>number</code> |
+| **`firstInstallTime`** | <code>number</code> |
+| **`lastUpdateTime`**   | <code>number</code> |
 
 
 ### Type Aliases

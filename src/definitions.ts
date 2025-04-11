@@ -32,9 +32,9 @@ interface UsageStatsOptions {
    * Defined in terms of "Unix time"
    */
   beginTime: number;
-  
+
   /**
-   * The exclusive end of the range of stats to include in the results. 
+   * The exclusive end of the range of stats to include in the results.
    * Defined in terms of "Unix time"
    */
   endTime: number;
@@ -56,4 +56,40 @@ export interface CapacitorUsageStatsManagerPlugin {
    * This will always open the settings screen, even if the permission is already granted.
    */
   openUsageStatsSettings(): Promise<void>;
+  /**
+   * Queries all installed packages on the device.
+   * Requires the QUERY_ALL_PACKAGES permission.
+   *
+   * @since 1.2.0
+   */
+  queryAllPackages(): Promise<{ packages: PackageInfo[] }>;
+}
+
+/**
+ * Represents a single usage event.
+ */
+export interface UsageEvent {
+  packageName: string;
+  className?: string; // Might be null
+  timeStamp: number; // Milliseconds since epoch
+  eventType: number; // Event type constant (e.g., MOVE_TO_FOREGROUND, MOVE_TO_BACKGROUND)
+  configuration?: any; // Configuration object (requires API 28+)
+  shortcutId?: string; // Shortcut ID (requires API 28+)
+  standbyBucket?: number; // App standby bucket (requires API 28+)
+  notificationChannelId?: string; // Notification channel ID (requires API 29+)
+  instanceId?: number; // Instance ID (requires API 30+)
+  taskRootPackageName?: string; // Task root package name (requires API 31+)
+  taskRootClassName?: string; // Task root class name (requires API 31+)
+}
+
+/**
+ * Represents basic information about an installed package.
+ */
+export interface PackageInfo {
+  packageName: string;
+  appName: string;
+  versionName: string;
+  versionCode: number;
+  firstInstallTime: number; // Milliseconds since epoch
+  lastUpdateTime: number; // Milliseconds since epoch
 }

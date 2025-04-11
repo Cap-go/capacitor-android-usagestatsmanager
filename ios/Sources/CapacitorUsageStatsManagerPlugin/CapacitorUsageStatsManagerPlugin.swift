@@ -14,7 +14,7 @@ public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "isUsageStatsPermissionGranted", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "openUsageStatsSettings", returnType: CAPPluginReturnPromise)
     ]
-    
+
     @objc func queryAndAggregateUsageStats(_ call: CAPPluginCall) {
         call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
     }
@@ -25,5 +25,5 @@ public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
 
     @objc func openUsageStatsSettings(_ call: CAPPluginCall) {
         call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
-    }    
+    }
 }

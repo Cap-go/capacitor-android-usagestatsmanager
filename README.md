@@ -34,6 +34,7 @@ npx cap sync
 * [`queryAndAggregateUsageStats(...)`](#queryandaggregateusagestats)
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
+* [`queryAllPackages()`](#queryallpackages)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -81,6 +82,22 @@ This will always open the settings screen, even if the permission is already gra
 --------------------
 
 
+### queryAllPackages()
+
+```typescript
+queryAllPackages() => Promise<{ packages: PackageInfo[]; }>
+```
+
+Queries all installed packages on the device.
+Requires the QUERY_ALL_PACKAGES permission.
+
+**Returns:** <code>Promise&lt;{ packages: PackageInfo[]; }&gt;</code>
+
+**Since:** 1.2.0
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -112,6 +129,20 @@ This will always open the settings screen, even if the permission is already gra
 | Prop          | Type                 | Description                                    |
 | ------------- | -------------------- | ---------------------------------------------- |
 | **`granted`** | <code>boolean</code> | Whether the usage stats permission is granted. |
+
+
+#### PackageInfo
+
+Represents basic information about an installed package.
+
+| Prop                   | Type                |
+| ---------------------- | ------------------- |
+| **`packageName`**      | <code>string</code> |
+| **`appName`**          | <code>string</code> |
+| **`versionName`**      | <code>string</code> |
+| **`versionCode`**      | <code>number</code> |
+| **`firstInstallTime`** | <code>number</code> |
+| **`lastUpdateTime`**   | <code>number</code> |
 
 
 ### Type Aliases

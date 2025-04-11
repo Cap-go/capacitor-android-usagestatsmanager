@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [7.0.2](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.1...7.0.2) (2025-04-11)
+
+
+### Bug Fixes
+
+* readme ([c39196a](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/c39196a9dbf9578873056d257f66152b3f6c7175))
+
 ### [7.0.1](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/0.0.5...7.0.1) (2025-04-11)
 
 

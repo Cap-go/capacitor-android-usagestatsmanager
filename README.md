@@ -121,8 +121,6 @@ This will always open the settings screen, even if the permission is already gra
 
 Construct a type with a set of properties K of type T
 
-<code>{
- [P in K]: T;
- }</code>
+<code>{ [P in K]: T; }</code>
 
 </docgen-api>

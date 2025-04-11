@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/0.0.3...0.0.4) (2025-04-11)
+
+
+### Features
+
+* add queryAllPackages ([3bf77f1](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/3bf77f1002322189e1315719a24bfc52aa48c6a3))
+
 ### [0.0.3](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/0.0.2...0.0.3) (2025-04-11)
 
 

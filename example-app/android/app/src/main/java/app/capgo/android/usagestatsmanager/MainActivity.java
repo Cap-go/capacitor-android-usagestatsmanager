@@ -1,4 +1,4 @@
-package com.example.plugin;
+package app.capgo.android.usagestatsmanager;
 
 import com.getcapacitor.BridgeActivity;
 

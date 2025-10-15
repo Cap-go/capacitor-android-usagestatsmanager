@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.0.12](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.11...7.0.12) (2025-10-15)
+
+
+### Bug Fixes
+
+* lock and lint ([3519ffb](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/3519ffb75e761f0dc488d8d742df5090e26fe73f))
+
 ## [7.0.11](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.10...7.0.11) (2025-10-15)
 
 

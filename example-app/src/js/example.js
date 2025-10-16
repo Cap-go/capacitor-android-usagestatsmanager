@@ -145,9 +145,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-// Keep the old functionality for reference, but don't expose it in the UI
-window.testEcho = () => {
-    const inputValue = "test";
-    CapacitorUsageStatsManager.echo({ value: inputValue })
-}

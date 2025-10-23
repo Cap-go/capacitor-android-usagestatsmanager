@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.1.2](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.1.1...7.1.2) (2025-10-23)
+
+
+### Bug Fixes
+
+* remove footer in discord ([fca3bd2](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/fca3bd273f3afd116382e0b76b3650ba779c7384))
+
 ## [7.1.1](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.1.0...7.1.1) (2025-10-23)
 
 

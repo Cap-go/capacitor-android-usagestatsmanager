@@ -37,6 +37,7 @@ npx cap sync
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
 * [`queryAllPackages()`](#queryallpackages)
+* [`getPluginVersion()`](#getpluginversion)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -45,19 +46,23 @@ npx cap sync
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
+Capacitor plugin for accessing Android UsageStatsManager API.
+
 ### queryAndAggregateUsageStats(...)
 
 ```typescript
 queryAndAggregateUsageStats(options: UsageStatsOptions) => Promise<Record<string, UsageStats>>
 ```
 
-Queries and aggregates usage stats for the given options.
+Queries and aggregates usage stats for the given time range.
 
-| Param         | Type                                                            | Description                  |
-| ------------- | --------------------------------------------------------------- | ---------------------------- |
-| **`options`** | <code><a href="#usagestatsoptions">UsageStatsOptions</a></code> | - The options for the query. |
+| Param         | Type                                                            | Description                            |
+| ------------- | --------------------------------------------------------------- | -------------------------------------- |
+| **`options`** | <code><a href="#usagestatsoptions">UsageStatsOptions</a></code> | - The time range options for the query |
 
 **Returns:** <code>Promise&lt;<a href="#record">Record</a>&lt;string, <a href="#usagestats">UsageStats</a>&gt;&gt;</code>
+
+**Since:** 1.0.0
 
 --------------------
 
@@ -72,6 +77,8 @@ Checks if the usage stats permission is granted.
 
 **Returns:** <code>Promise&lt;<a href="#usagestatspermissionresult">UsageStatsPermissionResult</a>&gt;</code>
 
+**Since:** 1.0.0
+
 --------------------
 
 
@@ -84,6 +91,8 @@ openUsageStatsSettings() => Promise<void>
 Open the usage stats settings screen.
 This will open the usage stats settings screen, which allows the user to grant the usage stats permission.
 This will always open the settings screen, even if the permission is already granted.
+
+**Since:** 1.0.0
 
 --------------------
 
@@ -104,10 +113,27 @@ Requires the QUERY_ALL_PACKAGES permission.
 --------------------
 
 
+### getPluginVersion()
+
+```typescript
+getPluginVersion() => Promise<{ version: string; }>
+```
+
+Get the native Capacitor plugin version.
+
+**Returns:** <code>Promise&lt;{ version: string; }&gt;</code>
+
+**Since:** 1.0.0
+
+--------------------
+
+
 ### Interfaces
 
 
 #### UsageStats
+
+Usage statistics for an Android app.
 
 | Prop                                | Type                | Description                                                                                        |
 | ----------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------- |
@@ -124,6 +150,8 @@ Requires the QUERY_ALL_PACKAGES permission.
 
 #### UsageStatsOptions
 
+Options for querying usage statistics.
+
 | Prop            | Type                | Description                                                                                              |
 | --------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
 | **`beginTime`** | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time" |
@@ -131,6 +159,8 @@ Requires the QUERY_ALL_PACKAGES permission.
 
 
 #### UsageStatsPermissionResult
+
+Result of a usage stats permission check.
 
 | Prop          | Type                 | Description                                    |
 | ------------- | -------------------- | ---------------------------------------------- |
@@ -141,18 +171,14 @@ Requires the QUERY_ALL_PACKAGES permission.
 
 Represents basic information about an installed package.
 
-| Prop                   | Type                |
-| ---------------------- | ------------------- |
-| **`packageName`**      | <code>string</code> |
-| **`appName`**          | <code>string</code> |
-| **`versionName`**      | <code>string</code> |
-| **`versionCode`**      | <code>number</code> |
-| **`firstInstallTime`** | <code>number</code> |
-| **`lastUpdateTime`**   | <code>number</code> |
-
-| Method               | Signature                                    | Description                             |
-| -------------------- | -------------------------------------------- | --------------------------------------- |
-| **getPluginVersion** | () =&gt; Promise&lt;{ version: string; }&gt; | Get the native Capacitor plugin version |
+| Prop                   | Type                | Description                                    |
+| ---------------------- | ------------------- | ---------------------------------------------- |
+| **`packageName`**      | <code>string</code> | Package name                                   |
+| **`appName`**          | <code>string</code> | App display name                               |
+| **`versionName`**      | <code>string</code> | Version name string                            |
+| **`versionCode`**      | <code>number</code> | Version code number                            |
+| **`firstInstallTime`** | <code>number</code> | First install time in milliseconds since epoch |
+| **`lastUpdateTime`**   | <code>number</code> | Last update time in milliseconds since epoch   |
 
 
 ### Type Aliases

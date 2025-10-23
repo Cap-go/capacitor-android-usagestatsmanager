@@ -1,4 +1,9 @@
-interface UsageStats {
+/**
+ * Usage statistics for an Android app.
+ *
+ * @since 1.0.0
+ */
+export interface UsageStats {
   /**
    * The first timestamp of the usage stats.
    */
@@ -41,7 +46,12 @@ interface UsageStats {
   totalTimeVisible?: number;
 }
 
-interface UsageStatsOptions {
+/**
+ * Options for querying usage statistics.
+ *
+ * @since 1.0.0
+ */
+export interface UsageStatsOptions {
   /**
    * The inclusive beginning of the range of stats to include in the results.
    * Defined in terms of "Unix time"
@@ -55,75 +65,156 @@ interface UsageStatsOptions {
   endTime: number;
 }
 
-interface UsageStatsPermissionResult {
+/**
+ * Result of a usage stats permission check.
+ *
+ * @since 1.0.0
+ */
+export interface UsageStatsPermissionResult {
   /**
    * Whether the usage stats permission is granted.
    */
   granted: boolean;
 }
 
+/**
+ * Capacitor plugin for accessing Android UsageStatsManager API.
+ *
+ * @since 1.0.0
+ */
 export interface CapacitorUsageStatsManagerPlugin {
   /**
-   * Queries and aggregates usage stats for the given options.
+   * Queries and aggregates usage stats for the given time range.
    *
-   * @param options - The options for the query.
-   * @returns A promise that resolves to a record of package names and their corresponding usage stats.
+   * @param options - The time range options for the query
+   * @returns Promise that resolves to a record of package names and their corresponding usage stats
+   * @throws Error if the permission is not granted or query fails
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+   * const now = Date.now();
+   * const stats = await UsageStatsManager.queryAndAggregateUsageStats({
+   *   beginTime: oneDayAgo,
+   *   endTime: now
+   * });
+   *
+   * for (const [packageName, usageData] of Object.entries(stats)) {
+   *   console.log(`${packageName}: ${usageData.totalTimeInForeground}ms`);
+   * }
+   * ```
    */
   queryAndAggregateUsageStats(options: UsageStatsOptions): Promise<Record<string, UsageStats>>;
+
   /**
    * Checks if the usage stats permission is granted.
    *
-   * @returns A promise that resolves to a UsageStatsPermissionResult object.
+   * @returns Promise that resolves to a permission result object
+   * @throws Error if checking permission fails
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * const { granted } = await UsageStatsManager.isUsageStatsPermissionGranted();
+   * if (!granted) {
+   *   await UsageStatsManager.openUsageStatsSettings();
+   * }
+   * ```
    */
   isUsageStatsPermissionGranted(): Promise<UsageStatsPermissionResult>;
+
   /**
    * Open the usage stats settings screen.
    * This will open the usage stats settings screen, which allows the user to grant the usage stats permission.
    * This will always open the settings screen, even if the permission is already granted.
+   *
+   * @returns Promise that resolves when the settings screen is opened
+   * @throws Error if opening settings fails
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * await UsageStatsManager.openUsageStatsSettings();
+   * ```
    */
   openUsageStatsSettings(): Promise<void>;
+
   /**
    * Queries all installed packages on the device.
    * Requires the QUERY_ALL_PACKAGES permission.
    *
+   * @returns Promise that resolves with an array of package information
+   * @throws Error if the permission is not granted or query fails
    * @since 1.2.0
+   * @example
+   * ```typescript
+   * const { packages } = await UsageStatsManager.queryAllPackages();
+   * packages.forEach(pkg => {
+   *   console.log(`${pkg.appName} (${pkg.packageName}): v${pkg.versionName}`);
+   * });
+   * ```
    */
   queryAllPackages(): Promise<{ packages: PackageInfo[] }>;
+
+  /**
+   * Get the native Capacitor plugin version.
+   *
+   * @returns Promise that resolves with the plugin version
+   * @throws Error if getting the version fails
+   * @since 1.0.0
+   * @example
+   * ```typescript
+   * const { version } = await UsageStatsManager.getPluginVersion();
+   * console.log('Plugin version:', version);
+   * ```
+   */
+  getPluginVersion(): Promise<{ version: string }>;
 }
 
 /**
  * Represents a single usage event.
+ *
+ * @since 1.0.0
  */
 export interface UsageEvent {
+  /** Package name of the app */
   packageName: string;
-  className?: string; // Might be null
-  timeStamp: number; // Milliseconds since epoch
-  eventType: number; // Event type constant (e.g., MOVE_TO_FOREGROUND, MOVE_TO_BACKGROUND)
-  configuration?: any; // Configuration object (requires API 28+)
-  shortcutId?: string; // Shortcut ID (requires API 28+)
-  standbyBucket?: number; // App standby bucket (requires API 28+)
-  notificationChannelId?: string; // Notification channel ID (requires API 29+)
-  instanceId?: number; // Instance ID (requires API 30+)
-  taskRootPackageName?: string; // Task root package name (requires API 31+)
-  taskRootClassName?: string; // Task root class name (requires API 31+)
+  /** Class name (might be null) */
+  className?: string;
+  /** Timestamp in milliseconds since epoch */
+  timeStamp: number;
+  /** Event type constant (e.g., MOVE_TO_FOREGROUND, MOVE_TO_BACKGROUND) */
+  eventType: number;
+  /** Configuration object (requires API 28+) */
+  configuration?: any;
+  /** Shortcut ID (requires API 28+) */
+  shortcutId?: string;
+  /** App standby bucket (requires API 28+) */
+  standbyBucket?: number;
+  /** Notification channel ID (requires API 29+) */
+  notificationChannelId?: string;
+  /** Instance ID (requires API 30+) */
+  instanceId?: number;
+  /** Task root package name (requires API 31+) */
+  taskRootPackageName?: string;
+  /** Task root class name (requires API 31+) */
+  taskRootClassName?: string;
 }
 
 /**
  * Represents basic information about an installed package.
+ *
+ * @since 1.0.0
  */
 export interface PackageInfo {
+  /** Package name */
   packageName: string;
+  /** App display name */
   appName: string;
+  /** Version name string */
   versionName: string;
+  /** Version code number */
   versionCode: number;
-  firstInstallTime: number; // Milliseconds since epoch
-  lastUpdateTime: number; // Milliseconds since epoch
-
-  /**
-   * Get the native Capacitor plugin version
-   *
-   * @returns {Promise<{ id: string }>} an Promise with version for this device
-   * @throws An error if the something went wrong
-   */
-  getPluginVersion(): Promise<{ version: string }>;
+  /** First install time in milliseconds since epoch */
+  firstInstallTime: number;
+  /** Last update time in milliseconds since epoch */
+  lastUpdateTime: number;
 }

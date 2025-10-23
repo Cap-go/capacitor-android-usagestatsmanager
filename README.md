@@ -150,6 +150,10 @@ Represents basic information about an installed package.
 | **`firstInstallTime`** | <code>number</code> |
 | **`lastUpdateTime`**   | <code>number</code> |
 
+| Method               | Signature                                    | Description                             |
+| -------------------- | -------------------------------------------- | --------------------------------------- |
+| **getPluginVersion** | () =&gt; Promise&lt;{ version: string; }&gt; | Get the native Capacitor plugin version |
+
 
 ### Type Aliases
 

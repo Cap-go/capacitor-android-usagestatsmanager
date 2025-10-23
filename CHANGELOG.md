@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.1.0](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.13...7.1.0) (2025-10-23)
+
+
+### Features
+
+* add plugin version retrieval methods and update workflows for changelog generation ([cf2e8a8](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/cf2e8a85093c86720c1a07d4201b27a88479787a))
+
+
+### Bug Fixes
+
+* remove content field from Discord webhook configuration ([58bfeb1](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/58bfeb1ed46f75ae4f4f20094c8c80532f3cbd29))
+
 ## [7.0.13](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.12...7.0.13) (2025-10-16)
 
 ## [7.0.12](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.0.11...7.0.12) (2025-10-15)

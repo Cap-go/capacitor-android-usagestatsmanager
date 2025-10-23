@@ -7,12 +7,14 @@ import Capacitor
  */
 @objc(CapacitorUsageStatsManagerPlugin)
 public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
+    private let PLUGIN_VERSION: String = ""
     public let identifier = "CapacitorUsageStatsManagerPlugin"
     public let jsName = "CapacitorUsageStatsManager"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "queryAndAggregateUsageStats", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "isUsageStatsPermissionGranted", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "openUsageStatsSettings", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "openUsageStatsSettings", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
 
     @objc func queryAndAggregateUsageStats(_ call: CAPPluginCall) {
@@ -26,4 +28,9 @@ public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func openUsageStatsSettings(_ call: CAPPluginCall) {
         call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
     }
+
+    @objc func getPluginVersion(_ call: CAPPluginCall) {
+        call.resolve(["version": self.PLUGIN_VERSION])
+    }
+
 }

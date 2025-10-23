@@ -25,6 +25,8 @@ import java.util.Map;
 @CapacitorPlugin(name = "CapacitorUsageStatsManager")
 public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
+    private final String PLUGIN_VERSION = "";
+
     @PluginMethod
     public void queryAndAggregateUsageStats(final PluginCall call) {
         // I cannot use the primitive long here because it would create an NPE
@@ -159,5 +161,16 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
         }
 
         return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    @PluginMethod
+    public void getPluginVersion(final PluginCall call) {
+        try {
+            final JSObject ret = new JSObject();
+            ret.put("version", this.PLUGIN_VERSION);
+            call.resolve(ret);
+        } catch (final Exception e) {
+            call.reject("Could not get plugin version", e);
+        }
     }
 }

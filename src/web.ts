@@ -15,4 +15,8 @@ export class CapacitorUsageStatsManagerWeb extends WebPlugin implements Capacito
   queryAllPackages(): Promise<{ packages: PackageInfo[] }> {
     throw new Error('Method not implemented.');
   }
+
+  async getPluginVersion(): Promise<{ version: string }> {
+    return { version: 'web' };
+  }
 }

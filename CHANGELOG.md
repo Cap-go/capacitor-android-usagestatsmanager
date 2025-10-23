@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.2.0](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.1.2...7.2.0) (2025-10-23)
+
+
+### Features
+
+* add getPluginVersion method and enhance documentation for usage stats ([14471f6](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/14471f63cf8b5cde78d015e1707258047d9935f1))
+
 ## [7.1.2](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.1.1...7.1.2) (2025-10-23)
 
 

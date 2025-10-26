@@ -22,6 +22,10 @@ Requires the following permissions in your `AndroidManifest.xml`:
 
 
 
+## Documentation
+
+The most complete doc is available here: https://capgo.app/docs/plugins/android-usagestatsmanager/
+
 ## Install
 
 ```bash

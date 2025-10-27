@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.2.3](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.2.2...7.2.3) (2025-10-27)
+
+
+### Bug Fixes
+
+* renovate capacitor dep ([f10217b](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/f10217bf42ec101e521cb3d4750482e46b703ac9))
+
 ## [7.2.2](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.2.1...7.2.2) (2025-10-26)
 
 

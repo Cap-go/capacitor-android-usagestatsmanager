@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [7.2.4](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.2.3...7.2.4) (2025-10-29)
+
+
+### Bug Fixes
+
+* CI/CD config ([c114a4f](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/c114a4fde5c9f990290d79470f1d37c2f54617fd))
+* update AI model in build workflow ([9ecdc4d](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/9ecdc4de0293d41810e0a8ff2f96b3e6a02cc12d))
+* update github action ([5b55d24](https://github.com/Cap-go/capacitor-android-usagestatsmanager/commit/5b55d24951fabd5bad902fbb2193cd9b45905059))
+
 ## [7.2.3](https://github.com/Cap-go/capacitor-android-usagestatsmanager/compare/7.2.2...7.2.3) (2025-10-27)
 
 

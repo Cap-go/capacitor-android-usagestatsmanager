@@ -9,6 +9,17 @@
 ## Description
 Exposes the Android's UsageStatsManager SDK to Capacitor
 
+## Why Android UsageStatsManager?
+
+The only plugin exposing Android's **UsageStatsManager API** to Capacitor - this Android API was not supported by any plugin before:
+
+- **App usage tracking** - Monitor which apps users open and for how long
+- **Screen time analytics** - Build parental controls and digital wellbeing features
+- **Package information** - Query all installed apps on the device
+- **Time-based queries** - Get usage stats for any time range
+
+Perfect for parental control apps, digital wellbeing tools, productivity trackers, and screen time managers.
+
 ## Usage
 
 Requires the following permissions in your `AndroidManifest.xml`:

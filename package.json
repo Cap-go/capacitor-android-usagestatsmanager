@@ -1,6 +1,6 @@
 {
   "name": "@capgo/capacitor-android-usagestatsmanager",
-  "version": "7.2.10",
+  "version": "7.2.11",
   "description": "Exposes the Android's UsageStatsManager SDK to Capacitor",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

@@ -25,7 +25,7 @@ import java.util.Map;
 @CapacitorPlugin(name = "CapacitorUsageStatsManager")
 public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
-    private final String pluginVersion = "8.0.1";
+    private final String pluginVersion = "8.0.2";
 
     @PluginMethod
     public void queryAndAggregateUsageStats(final PluginCall call) {

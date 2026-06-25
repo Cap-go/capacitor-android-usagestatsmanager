@@ -8,14 +8,14 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
-import android.provider.Settings;
-import android.util.Log;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.Base64;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -103,6 +103,7 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             call.reject("Error during openUsageStatsSettings: " + sw);
         }
     }
+
     @PluginMethod
     public void queryAllPackages(final PluginCall call) {
         final boolean includeIcon = Boolean.TRUE.equals(call.getBoolean("includeIcon", false));

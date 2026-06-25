@@ -12,7 +12,7 @@ export class CapacitorUsageStatsManagerWeb extends WebPlugin implements Capacito
   queryAndAggregateUsageStats(_options: any): Promise<Record<string, any>> {
     throw new Error('Method not implemented.');
   }
-  queryAllPackages(): Promise<{ packages: PackageInfo[] }> {
+  queryAllPackages(_options?: { includeIcon?: boolean }): Promise<{ packages: PackageInfo[] }> {
     throw new Error('Method not implemented.');
   }
 

@@ -11,12 +11,18 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Base64;
 import androidx.annotation.NonNull;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -97,9 +103,9 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             call.reject("Error during openUsageStatsSettings: " + sw);
         }
     }
-
     @PluginMethod
     public void queryAllPackages(final PluginCall call) {
+        final boolean includeIcon = Boolean.TRUE.equals(call.getBoolean("includeIcon", false));
         PackageManager pm = getContext().getPackageManager();
         List<PackageInfo> packages = pm.getInstalledPackages(0);
         JSObject result = new JSObject();
@@ -108,11 +114,26 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
         for (PackageInfo packageInfo : packages) {
             JSObject packageJS = new JSObject();
             packageJS.put("packageName", packageInfo.packageName);
+            ApplicationInfo appInfo = null;
             try {
-                ApplicationInfo appInfo = pm.getApplicationInfo(packageInfo.packageName, 0);
+                appInfo = pm.getApplicationInfo(packageInfo.packageName, 0);
                 packageJS.put("appName", pm.getApplicationLabel(appInfo).toString());
             } catch (PackageManager.NameNotFoundException e) {
                 packageJS.put("appName", packageInfo.packageName);
+            }
+            if (appInfo != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                packageJS.put("category", appInfo.category);
+            }
+            if (includeIcon && appInfo != null) {
+                try {
+                    Drawable icon = pm.getApplicationIcon(appInfo);
+                    String iconDataUrl = drawableToBase64DataUrl(icon);
+                    if (iconDataUrl != null) {
+                        packageJS.put("icon", iconDataUrl);
+                    }
+                } catch (Exception e) {
+                    Log.w("CapacitorUsageStatsManager", "Failed to load icon for " + packageInfo.packageName, e);
+                }
             }
             packageJS.put("versionName", packageInfo.versionName);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -128,6 +149,34 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
         }
         result.put("packages", packagesJA);
         call.resolve(result);
+    }
+
+    private static String drawableToBase64DataUrl(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+
+        Bitmap bitmap;
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (bitmap == null) {
+                return null;
+            }
+        } else {
+            int width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : 1;
+            int height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : 1;
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        }
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)) {
+            return null;
+        }
+
+        return "data:image/png;base64," + Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP);
     }
 
     @NonNull

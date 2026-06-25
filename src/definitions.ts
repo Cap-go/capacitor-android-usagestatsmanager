@@ -141,18 +141,19 @@ export interface CapacitorUsageStatsManagerPlugin {
    * Queries all installed packages on the device.
    * Requires the QUERY_ALL_PACKAGES permission.
    *
+   * @param options - Optional query settings
    * @returns Promise that resolves with an array of package information
    * @throws Error if the permission is not granted or query fails
    * @since 1.2.0
    * @example
    * ```typescript
-   * const { packages } = await UsageStatsManager.queryAllPackages();
+   * const { packages } = await UsageStatsManager.queryAllPackages({ includeIcon: true });
    * packages.forEach(pkg => {
-   *   console.log(`${pkg.appName} (${pkg.packageName}): v${pkg.versionName}`);
+   *   console.log(`${pkg.appName} (${pkg.packageName}): category=${pkg.category}`);
    * });
    * ```
    */
-  queryAllPackages(): Promise<{ packages: PackageInfo[] }>;
+  queryAllPackages(options?: QueryAllPackagesOptions): Promise<{ packages: PackageInfo[] }>;
 
   /**
    * Get the native Capacitor plugin version.
@@ -200,6 +201,21 @@ export interface UsageEvent {
 }
 
 /**
+ * Options for querying installed packages.
+ *
+ * @since 8.0.33
+ */
+export interface QueryAllPackagesOptions {
+  /**
+   * When true, includes each app's launcher icon as a base64 data URL.
+   * Defaults to false because icons significantly increase the response size.
+   *
+   * @default false
+   */
+  includeIcon?: boolean;
+}
+
+/**
  * Represents basic information about an installed package.
  *
  * @since 1.0.0
@@ -217,4 +233,29 @@ export interface PackageInfo {
   firstInstallTime: number;
   /** Last update time in milliseconds since epoch */
   lastUpdateTime: number;
+  /**
+   * Application category from `ApplicationInfo.category`.
+   * Only available on Android 8.0 (API level 26) and above.
+   *
+   * Common values:
+   * - `0` — undefined
+   * - `1` — game
+   * - `2` — audio
+   * - `3` — video
+   * - `4` — image
+   * - `5` — social
+   * - `6` — news
+   * - `7` — maps
+   * - `8` — productivity
+   *
+   * @since 8.0.33
+   */
+  category?: number;
+  /**
+   * App icon as a base64 data URL (`data:image/png;base64,...`).
+   * Only present when `queryAllPackages({ includeIcon: true })` is used.
+   *
+   * @since 8.0.33
+   */
+  icon?: string;
 }

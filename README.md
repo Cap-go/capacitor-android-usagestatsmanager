@@ -76,7 +76,7 @@ npx cap sync
 * [`queryAndAggregateUsageStats(...)`](#queryandaggregateusagestats)
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
-* [`queryAllPackages()`](#queryallpackages)
+* [`queryAllPackages(...)`](#queryallpackages)
 * [`getPluginVersion()`](#getpluginversion)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
@@ -137,14 +137,18 @@ This will always open the settings screen, even if the permission is already gra
 --------------------
 
 
-### queryAllPackages()
+### queryAllPackages(...)
 
 ```typescript
-queryAllPackages() => Promise<{ packages: PackageInfo[]; }>
+queryAllPackages(options?: QueryAllPackagesOptions | undefined) => Promise<{ packages: PackageInfo[]; }>
 ```
 
 Queries all installed packages on the device.
 Requires the QUERY_ALL_PACKAGES permission.
+
+| Param         | Type                                                                        | Description               |
+| ------------- | --------------------------------------------------------------------------- | ------------------------- |
+| **`options`** | <code><a href="#queryallpackagesoptions">QueryAllPackagesOptions</a></code> | - Optional query settings |
 
 **Returns:** <code>Promise&lt;{ packages: PackageInfo[]; }&gt;</code>
 
@@ -211,14 +215,25 @@ Result of a usage stats permission check.
 
 Represents basic information about an installed package.
 
-| Prop                   | Type                | Description                                    |
-| ---------------------- | ------------------- | ---------------------------------------------- |
-| **`packageName`**      | <code>string</code> | Package name                                   |
-| **`appName`**          | <code>string</code> | App display name                               |
-| **`versionName`**      | <code>string</code> | Version name string                            |
-| **`versionCode`**      | <code>number</code> | Version code number                            |
-| **`firstInstallTime`** | <code>number</code> | First install time in milliseconds since epoch |
-| **`lastUpdateTime`**   | <code>number</code> | Last update time in milliseconds since epoch   |
+| Prop                   | Type                | Description                                                                                                                                                                                                                                                         | Since  |
+| ---------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| **`packageName`**      | <code>string</code> | Package name                                                                                                                                                                                                                                                        |        |
+| **`appName`**          | <code>string</code> | App display name                                                                                                                                                                                                                                                    |        |
+| **`versionName`**      | <code>string</code> | Version name string                                                                                                                                                                                                                                                 |        |
+| **`versionCode`**      | <code>number</code> | Version code number                                                                                                                                                                                                                                                 |        |
+| **`firstInstallTime`** | <code>number</code> | First install time in milliseconds since epoch                                                                                                                                                                                                                      |        |
+| **`lastUpdateTime`**   | <code>number</code> | Last update time in milliseconds since epoch                                                                                                                                                                                                                        |        |
+| **`category`**         | <code>number</code> | Application category from `ApplicationInfo.category`. Only available on Android 8.0 (API level 26) and above. Common values: - `0` — undefined - `1` — game - `2` — audio - `3` — video - `4` — image - `5` — social - `6` — news - `7` — maps - `8` — productivity | 8.0.33 |
+| **`icon`**             | <code>string</code> | App icon as a base64 data URL (`data:image/png;base64,...`). Only present when `queryAllPackages({ includeIcon: true })` is used.                                                                                                                                   | 8.0.33 |
+
+
+#### QueryAllPackagesOptions
+
+Options for querying installed packages.
+
+| Prop              | Type                 | Description                                                                                                                                  | Default            |
+| ----------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| **`includeIcon`** | <code>boolean</code> | When true, includes each app's launcher icon as a base64 data URL. Defaults to false because icons significantly increase the response size. | <code>false</code> |
 
 
 ### Type Aliases

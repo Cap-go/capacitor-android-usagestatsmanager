@@ -4,7 +4,7 @@ import pkg from './package.json';
 
 const config: CapacitorConfig = {
   appId: 'app.capgo.android.usagestatsmanager',
-  appName: 'Android Usage Stats Manager Example',
+  appName: '@capgo/capacitor-android-usagestatsmanager',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

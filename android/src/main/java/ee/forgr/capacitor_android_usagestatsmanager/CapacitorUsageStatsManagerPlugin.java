@@ -106,6 +106,13 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
         try {
             final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
             final UsageEvents events = usageStatsManager.queryEvents(beginTime, endTime);
+            if (events == null) {
+                // Android R+: queryEvents returns null when the user is locked.
+                final JSObject ret = new JSObject();
+                ret.put("events", new JSArray());
+                call.resolve(ret);
+                return;
+            }
             final UsageEvents.Event event = new UsageEvents.Event();
             final JSArray result = new JSArray();
 

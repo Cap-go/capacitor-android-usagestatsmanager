@@ -101,7 +101,7 @@ Queries and aggregates usage stats for the given time range.
 Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
 every bucket that intersects `[beginTime, endTime]`, without clipping to it.
 `totalTimeInForeground` can therefore include usage from outside the window.
-Use `queryEvents` when you need foreground time clipped to an exact range.
+Use `queryEvents` for timestamped lifecycle events in the requested range.
 
 | Param         | Type                                                            | Description                            |
 | ------------- | --------------------------------------------------------------- | -------------------------------------- |
@@ -122,9 +122,19 @@ queryEvents(options: QueryEventsOptions) => Promise<QueryEventsResult>
 
 Queries the raw usage event log for the given time range.
 
-Events have millisecond timestamps, so callers can sum resumed to paused
-intervals and clip them exactly to `[beginTime, endTime]`. This uses the
-same `PACKAGE_USAGE_STATS` permission as `queryAndAggregateUsageStats`.
+Returns lifecycle events whose timestamps fall in `[beginTime, endTime)`.
+Android does not emit a synthetic event for "already in foreground at
+beginTime" or "still in foreground at endTime". To measure duration across
+those boundaries, pass an earlier `beginTime` as lookback and clip locally:
+treat an unmatched pause as starting at the window start, and an unmatched
+resume as ending at the window end.
+
+Android retains events for only a few days. Older ranges may return an
+incomplete or empty list; that is not the same as zero foreground usage.
+
+Callers can sum resumed-to-paused intervals from the returned events.
+This uses the same `PACKAGE_USAGE_STATS` permission as
+`queryAndAggregateUsageStats`.
 
 Only lifecycle events are returned, to keep the bridge payload small:
 - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND

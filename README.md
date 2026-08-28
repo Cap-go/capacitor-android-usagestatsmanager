@@ -15,6 +15,7 @@ The only plugin exposing Android's **UsageStatsManager API** to Capacitor - this
 
 - **App usage tracking** - Monitor which apps users open and for how long
 - **Screen time analytics** - Build parental controls and digital wellbeing features
+- **Exact-window events** - Query raw lifecycle events when you need foreground time clipped to a specific range
 - **Package information** - Query all installed apps on the device
 - **Time-based queries** - Get usage stats for any time range
 
@@ -74,6 +75,7 @@ npx cap sync
 <docgen-index>
 
 * [`queryAndAggregateUsageStats(...)`](#queryandaggregateusagestats)
+* [`queryEvents(...)`](#queryevents)
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
 * [`queryAllPackages(...)`](#queryallpackages)
@@ -96,6 +98,11 @@ queryAndAggregateUsageStats(options: UsageStatsOptions) => Promise<Record<string
 
 Queries and aggregates usage stats for the given time range.
 
+Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
+every bucket that intersects `[beginTime, endTime]`, without clipping to it.
+`totalTimeInForeground` can therefore include usage from outside the window.
+Use `queryEvents` when you need foreground time clipped to an exact range.
+
 | Param         | Type                                                            | Description                            |
 | ------------- | --------------------------------------------------------------- | -------------------------------------- |
 | **`options`** | <code><a href="#usagestatsoptions">UsageStatsOptions</a></code> | - The time range options for the query |
@@ -103,6 +110,35 @@ Queries and aggregates usage stats for the given time range.
 **Returns:** <code>Promise&lt;<a href="#record">Record</a>&lt;string, <a href="#usagestats">UsageStats</a>&gt;&gt;</code>
 
 **Since:** 1.0.0
+
+--------------------
+
+
+### queryEvents(...)
+
+```typescript
+queryEvents(options: QueryEventsOptions) => Promise<QueryEventsResult>
+```
+
+Queries the raw usage event log for the given time range.
+
+Events have millisecond timestamps, so callers can sum resumed to paused
+intervals and clip them exactly to `[beginTime, endTime]`. This uses the
+same `PACKAGE_USAGE_STATS` permission as `queryAndAggregateUsageStats`.
+
+Only lifecycle events are returned, to keep the bridge payload small:
+- `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+- `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+- `23` — ACTIVITY_STOPPED
+- `26` — DEVICE_SHUTDOWN
+
+| Param         | Type                                                              | Description                                  |
+| ------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| **`options`** | <code><a href="#queryeventsoptions">QueryEventsOptions</a></code> | - The time range and optional package filter |
+
+**Returns:** <code>Promise&lt;<a href="#queryeventsresult">QueryEventsResult</a>&gt;</code>
+
+**Since:** 8.1.3
 
 --------------------
 
@@ -196,10 +232,53 @@ Usage statistics for an Android app.
 
 Options for querying usage statistics.
 
-| Prop            | Type                | Description                                                                                              |
-| --------------- | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| **`beginTime`** | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time" |
-| **`endTime`**   | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"       |
+| Prop              | Type                | Description                                                                                                                            | Since |
+| ----------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time"                               |       |
+| **`endTime`**     | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"                                     |       |
+| **`packageName`** | <code>string</code> | Optional package name. When set, only stats for this package are returned. Omit to return stats for every package (previous behavior). | 8.1.3 |
+
+
+#### QueryEventsResult
+
+Result of a `queryEvents` call.
+
+| Prop         | Type                      | Description                                                                   |
+| ------------ | ------------------------- | ----------------------------------------------------------------------------- |
+| **`events`** | <code>UsageEvent[]</code> | Lifecycle usage events in the requested range, ordered as returned by the OS. |
+
+
+#### UsageEvent
+
+Represents a single usage event.
+
+`queryEvents` currently populates `packageName`, `className`, `timeStamp`,
+and `eventType`. Other fields remain optional for compatibility.
+
+| Prop                        | Type                | Description                                                                                                                                                                                                                                               |
+| --------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`packageName`**           | <code>string</code> | Package name of the app                                                                                                                                                                                                                                   |
+| **`className`**             | <code>string</code> | Class name (might be null)                                                                                                                                                                                                                                |
+| **`timeStamp`**             | <code>number</code> | Timestamp in milliseconds since epoch                                                                                                                                                                                                                     |
+| **`eventType`**             | <code>number</code> | Event type constant from `android.app.usage.UsageEvents.Event`. `queryEvents` returns lifecycle types only: - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND - `23` — ACTIVITY_STOPPED - `26` — DEVICE_SHUTDOWN |
+| **`configuration`**         | <code>any</code>    | Configuration object (requires API 28+)                                                                                                                                                                                                                   |
+| **`shortcutId`**            | <code>string</code> | Shortcut ID (requires API 28+)                                                                                                                                                                                                                            |
+| **`standbyBucket`**         | <code>number</code> | App standby bucket (requires API 28+)                                                                                                                                                                                                                     |
+| **`notificationChannelId`** | <code>string</code> | Notification channel ID (requires API 29+)                                                                                                                                                                                                                |
+| **`instanceId`**            | <code>number</code> | Instance ID (requires API 30+)                                                                                                                                                                                                                            |
+| **`taskRootPackageName`**   | <code>string</code> | Task root package name (requires API 31+)                                                                                                                                                                                                                 |
+| **`taskRootClassName`**     | <code>string</code> | Task root class name (requires API 31+)                                                                                                                                                                                                                   |
+
+
+#### QueryEventsOptions
+
+Options for querying the raw usage event log.
+
+| Prop              | Type                | Description                                                                                                                                       |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of events to include in the results. Defined in terms of "Unix time"                                         |
+| **`endTime`**     | <code>number</code> | The exclusive end of the range of events to include in the results. Defined in terms of "Unix time"                                               |
+| **`packageName`** | <code>string</code> | Optional package name. When set, only events for this package are returned. Keeps the Capacitor bridge payload small when you care about one app. |
 
 
 #### UsageStatsPermissionResult

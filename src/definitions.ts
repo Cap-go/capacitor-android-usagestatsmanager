@@ -63,6 +63,14 @@ export interface UsageStatsOptions {
    * Defined in terms of "Unix time"
    */
   endTime: number;
+
+  /**
+   * Optional package name. When set, only stats for this package are returned.
+   * Omit to return stats for every package (previous behavior).
+   *
+   * @since 8.1.3
+   */
+  packageName?: string;
 }
 
 /**
@@ -86,6 +94,11 @@ export interface CapacitorUsageStatsManagerPlugin {
   /**
    * Queries and aggregates usage stats for the given time range.
    *
+   * Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
+   * every bucket that intersects `[beginTime, endTime]`, without clipping to it.
+   * `totalTimeInForeground` can therefore include usage from outside the window.
+   * Use `queryEvents` when you need foreground time clipped to an exact range.
+   *
    * @param options - The time range options for the query
    * @returns Promise that resolves to a record of package names and their corresponding usage stats
    * @throws Error if the permission is not granted or query fails
@@ -96,7 +109,8 @@ export interface CapacitorUsageStatsManagerPlugin {
    * const now = Date.now();
    * const stats = await UsageStatsManager.queryAndAggregateUsageStats({
    *   beginTime: oneDayAgo,
-   *   endTime: now
+   *   endTime: now,
+   *   packageName: 'com.example.app',
    * });
    *
    * for (const [packageName, usageData] of Object.entries(stats)) {
@@ -105,6 +119,38 @@ export interface CapacitorUsageStatsManagerPlugin {
    * ```
    */
   queryAndAggregateUsageStats(options: UsageStatsOptions): Promise<Record<string, UsageStats>>;
+
+  /**
+   * Queries the raw usage event log for the given time range.
+   *
+   * Events have millisecond timestamps, so callers can sum resumed to paused
+   * intervals and clip them exactly to `[beginTime, endTime]`. This uses the
+   * same `PACKAGE_USAGE_STATS` permission as `queryAndAggregateUsageStats`.
+   *
+   * Only lifecycle events are returned, to keep the bridge payload small:
+   * - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+   * - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+   * - `23` — ACTIVITY_STOPPED
+   * - `26` — DEVICE_SHUTDOWN
+   *
+   * @param options - The time range and optional package filter
+   * @returns Promise that resolves to the matching usage events
+   * @throws Error if the permission is not granted or query fails
+   * @since 8.1.3
+   * @example
+   * ```typescript
+   * const startOfDay = new Date().setHours(0, 0, 0, 0);
+   * const { events } = await UsageStatsManager.queryEvents({
+   *   beginTime: startOfDay,
+   *   endTime: Date.now(),
+   *   packageName: 'com.example.app',
+   * });
+   * events.forEach((event) => {
+   *   console.log(`${event.packageName} type=${event.eventType} at ${event.timeStamp}`);
+   * });
+   * ```
+   */
+  queryEvents(options: QueryEventsOptions): Promise<QueryEventsResult>;
 
   /**
    * Checks if the usage stats permission is granted.
@@ -171,7 +217,47 @@ export interface CapacitorUsageStatsManagerPlugin {
 }
 
 /**
+ * Options for querying the raw usage event log.
+ *
+ * @since 8.1.3
+ */
+export interface QueryEventsOptions {
+  /**
+   * The inclusive beginning of the range of events to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  beginTime: number;
+
+  /**
+   * The exclusive end of the range of events to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  endTime: number;
+
+  /**
+   * Optional package name. When set, only events for this package are returned.
+   * Keeps the Capacitor bridge payload small when you care about one app.
+   */
+  packageName?: string;
+}
+
+/**
+ * Result of a `queryEvents` call.
+ *
+ * @since 8.1.3
+ */
+export interface QueryEventsResult {
+  /**
+   * Lifecycle usage events in the requested range, ordered as returned by the OS.
+   */
+  events: UsageEvent[];
+}
+
+/**
  * Represents a single usage event.
+ *
+ * `queryEvents` currently populates `packageName`, `className`, `timeStamp`,
+ * and `eventType`. Other fields remain optional for compatibility.
  *
  * @since 1.0.0
  */
@@ -182,7 +268,14 @@ export interface UsageEvent {
   className?: string;
   /** Timestamp in milliseconds since epoch */
   timeStamp: number;
-  /** Event type constant (e.g., MOVE_TO_FOREGROUND, MOVE_TO_BACKGROUND) */
+  /**
+   * Event type constant from `android.app.usage.UsageEvents.Event`.
+   * `queryEvents` returns lifecycle types only:
+   * - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+   * - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+   * - `23` — ACTIVITY_STOPPED
+   * - `26` — DEVICE_SHUTDOWN
+   */
   eventType: number;
   /** Configuration object (requires API 28+) */
   configuration?: any;

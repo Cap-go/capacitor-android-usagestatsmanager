@@ -1,6 +1,7 @@
 package ee.forgr.capacitor_android_usagestatsmanager;
 
 import android.app.AppOpsManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -54,12 +56,18 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             return;
         }
 
+        // optional filter, avoids pushing every app's stats through the bridge
+        final String packageFilter = call.getString("packageName");
+
         try {
             final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
             final Map<String, UsageStats> response = usageStatsManager.queryAndAggregateUsageStats(beginTime, endTime);
             final JSObject finalResponse = new JSObject();
             for (final Map.Entry<String, UsageStats> stat : response.entrySet()) {
                 final String key = stat.getKey();
+                if (packageFilter != null && !packageFilter.isEmpty() && !packageFilter.equals(key)) {
+                    continue;
+                }
                 final JSObject encodedValue = getJsObject(stat);
                 finalResponse.put(key, encodedValue);
             }
@@ -70,6 +78,79 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             PrintWriter pw = new PrintWriter(sw);
             t.printStackTrace(pw);
             call.reject("Error during fetching stats: " + sw);
+        }
+    }
+
+    @PluginMethod
+    public void queryEvents(final PluginCall call) {
+        final Long beginTime = call.getLong("beginTime");
+        if (beginTime == null) {
+            call.reject("beginTime is null");
+            return;
+        }
+
+        final Long endTime = call.getLong("endTime");
+        if (endTime == null) {
+            call.reject("endTime is null");
+            return;
+        }
+
+        if (!this.checkUsageStatsPermission(this.getContext())) {
+            call.reject("Not allowed to query usage stats");
+            return;
+        }
+
+        // optional filter, avoids pushing every app's events through the bridge
+        final String packageFilter = call.getString("packageName");
+
+        try {
+            final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
+            final UsageEvents events = usageStatsManager.queryEvents(beginTime, endTime);
+            final UsageEvents.Event event = new UsageEvents.Event();
+            final JSArray result = new JSArray();
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event);
+
+                final String eventPackage = event.getPackageName();
+                if (eventPackage == null) {
+                    continue;
+                }
+                if (packageFilter != null && !packageFilter.isEmpty() && !packageFilter.equals(eventPackage)) {
+                    continue;
+                }
+
+                final int type = event.getEventType();
+                // ACTIVITY_RESUMED/PAUSED share values with pre-API-29 MOVE_TO_FOREGROUND/BACKGROUND (1/2).
+                if (
+                    type != UsageEvents.Event.ACTIVITY_RESUMED &&
+                    type != UsageEvents.Event.ACTIVITY_PAUSED &&
+                    type != UsageEvents.Event.ACTIVITY_STOPPED &&
+                    type != UsageEvents.Event.DEVICE_SHUTDOWN
+                ) {
+                    continue;
+                }
+
+                final JSObject e = new JSObject();
+                e.put("packageName", eventPackage);
+                final String className = event.getClassName();
+                if (className != null) {
+                    e.put("className", className);
+                }
+                e.put("timeStamp", event.getTimeStamp());
+                e.put("eventType", type);
+                result.put(e);
+            }
+
+            final JSObject ret = new JSObject();
+            ret.put("events", result);
+            call.resolve(ret);
+        } catch (Throwable t) {
+            Log.e("CapacitorUsageStatsManager", "Error during queryEvents", t);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            call.reject("Error during queryEvents: " + sw);
         }
     }
 

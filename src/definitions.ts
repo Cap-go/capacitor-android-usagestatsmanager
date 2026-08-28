@@ -67,6 +67,7 @@ export interface UsageStatsOptions {
   /**
    * Optional package name. When set, only stats for this package are returned.
    * Omit to return stats for every package (previous behavior).
+   * An empty string is rejected.
    *
    * @since 8.1.3
    */
@@ -132,6 +133,9 @@ export interface CapacitorUsageStatsManagerPlugin {
    *
    * Android retains events for only a few days. Older ranges may return an
    * incomplete or empty list; that is not the same as zero foreground usage.
+   * On Android R (API 30) and above, the OS also returns no events while the
+   * user is locked; this plugin then resolves `{ events: [] }`, which likewise
+   * must not be treated as zero foreground usage.
    *
    * Callers can sum resumed-to-paused intervals from the returned events.
    * This uses the same `PACKAGE_USAGE_STATS` permission as
@@ -247,6 +251,7 @@ export interface QueryEventsOptions {
   /**
    * Optional package name. When set, only events for this package are returned.
    * Keeps the Capacitor bridge payload small when you care about one app.
+   * An empty string is rejected.
    */
   packageName?: string;
 }

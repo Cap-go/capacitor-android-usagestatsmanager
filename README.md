@@ -131,6 +131,9 @@ resume as ending at the window end.
 
 Android retains events for only a few days. Older ranges may return an
 incomplete or empty list; that is not the same as zero foreground usage.
+On Android R (API 30) and above, the OS also returns no events while the
+user is locked; this plugin then resolves `{ events: [] }`, which likewise
+must not be treated as zero foreground usage.
 
 Callers can sum resumed-to-paused intervals from the returned events.
 This uses the same `PACKAGE_USAGE_STATS` permission as
@@ -242,11 +245,11 @@ Usage statistics for an Android app.
 
 Options for querying usage statistics.
 
-| Prop              | Type                | Description                                                                                                                            | Since |
-| ----------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time"                               |       |
-| **`endTime`**     | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"                                     |       |
-| **`packageName`** | <code>string</code> | Optional package name. When set, only stats for this package are returned. Omit to return stats for every package (previous behavior). | 8.1.3 |
+| Prop              | Type                | Description                                                                                                                                                         | Since |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time"                                                            |       |
+| **`endTime`**     | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"                                                                  |       |
+| **`packageName`** | <code>string</code> | Optional package name. When set, only stats for this package are returned. Omit to return stats for every package (previous behavior). An empty string is rejected. | 8.1.3 |
 
 
 #### QueryEventsResult
@@ -284,11 +287,11 @@ and `eventType`. Other fields remain optional for compatibility.
 
 Options for querying the raw usage event log.
 
-| Prop              | Type                | Description                                                                                                                                       |
-| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of events to include in the results. Defined in terms of "Unix time"                                         |
-| **`endTime`**     | <code>number</code> | The exclusive end of the range of events to include in the results. Defined in terms of "Unix time"                                               |
-| **`packageName`** | <code>string</code> | Optional package name. When set, only events for this package are returned. Keeps the Capacitor bridge payload small when you care about one app. |
+| Prop              | Type                | Description                                                                                                                                                                    |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of events to include in the results. Defined in terms of "Unix time"                                                                      |
+| **`endTime`**     | <code>number</code> | The exclusive end of the range of events to include in the results. Defined in terms of "Unix time"                                                                            |
+| **`packageName`** | <code>string</code> | Optional package name. When set, only events for this package are returned. Keeps the Capacitor bridge payload small when you care about one app. An empty string is rejected. |
 
 
 #### UsageStatsPermissionResult

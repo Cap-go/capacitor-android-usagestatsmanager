@@ -58,6 +58,10 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
         // optional filter, avoids pushing every app's stats through the bridge
         final String packageFilter = call.getString("packageName");
+        if (packageFilter != null && packageFilter.isEmpty()) {
+            call.reject("packageName is empty");
+            return;
+        }
 
         try {
             final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
@@ -65,7 +69,7 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             final JSObject finalResponse = new JSObject();
             for (final Map.Entry<String, UsageStats> stat : response.entrySet()) {
                 final String key = stat.getKey();
-                if (packageFilter != null && !packageFilter.isEmpty() && !packageFilter.equals(key)) {
+                if (packageFilter != null && !packageFilter.equals(key)) {
                     continue;
                 }
                 final JSObject encodedValue = getJsObject(stat);
@@ -102,6 +106,10 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
         // optional filter, avoids pushing every app's events through the bridge
         final String packageFilter = call.getString("packageName");
+        if (packageFilter != null && packageFilter.isEmpty()) {
+            call.reject("packageName is empty");
+            return;
+        }
 
         try {
             final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
@@ -123,7 +131,7 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
                 if (eventPackage == null) {
                     continue;
                 }
-                if (packageFilter != null && !packageFilter.isEmpty() && !packageFilter.equals(eventPackage)) {
+                if (packageFilter != null && !packageFilter.equals(eventPackage)) {
                     continue;
                 }
 

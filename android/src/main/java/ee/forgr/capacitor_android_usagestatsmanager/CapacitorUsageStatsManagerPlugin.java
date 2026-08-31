@@ -39,6 +39,8 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
      * Queries and aggregates usage stats for the given time range.
      * Optional {@code packageName} limits the result to one package; an empty
      * string is rejected. Omit the field to return every package.
+     *
+     * @param call Capacitor plugin call with beginTime, endTime, and optional packageName
      */
     @PluginMethod
     public void queryAndAggregateUsageStats(final PluginCall call) {
@@ -95,6 +97,8 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
      * Returns lifecycle events only. Optional {@code packageName} filters the
      * result; an empty string is rejected. Resolves {@code events: []} when
      * Android returns null because the user is locked.
+     *
+     * @param call Capacitor plugin call with beginTime, endTime, and optional packageName
      */
     @PluginMethod
     public void queryEvents(final PluginCall call) {

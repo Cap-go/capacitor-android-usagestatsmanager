@@ -99,7 +99,7 @@ queryAndAggregateUsageStats(options: UsageStatsOptions) => Promise<Record<string
 Queries and aggregates usage stats for the given time range.
 
 Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
-every bucket that intersects `[beginTime, endTime]`, without clipping to it.
+every bucket that intersects `[beginTime, endTime)`, without clipping to it.
 `totalTimeInForeground` can therefore include usage from outside the window.
 Use `queryEvents` for timestamped lifecycle events in the requested range.
 

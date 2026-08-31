@@ -18,10 +18,12 @@ public class CapacitorUsageStatsManagerPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
 
+    /// Android-only. Usage statistics are not available on iOS.
     @objc func queryAndAggregateUsageStats(_ call: CAPPluginCall) {
         call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
     }
 
+    /// Android-only. Usage statistics are not available on iOS.
     @objc func queryEvents(_ call: CAPPluginCall) {
         call.reject("Usage statistics are not available on iOS. This functionality is only supported on Android.")
     }

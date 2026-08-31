@@ -14,9 +14,15 @@ export class CapacitorUsageStatsManagerWeb extends WebPlugin implements Capacito
   openUsageStatsSettings(): Promise<void> {
     throw new Error('Method not implemented.');
   }
+  /**
+   * Android-only. Web does not expose UsageStatsManager.
+   */
   queryAndAggregateUsageStats(_options: any): Promise<Record<string, any>> {
     throw new Error('Method not implemented.');
   }
+  /**
+   * Android-only. Web does not expose UsageStatsManager events.
+   */
   queryEvents(_options: QueryEventsOptions): Promise<QueryEventsResult> {
     throw new Error('Method not implemented.');
   }

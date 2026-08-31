@@ -35,6 +35,11 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
     private final String pluginVersion = "8.1.2";
 
+    /**
+     * Queries and aggregates usage stats for the given time range.
+     * Optional {@code packageName} limits the result to one package; an empty
+     * string is rejected. Omit the field to return every package.
+     */
     @PluginMethod
     public void queryAndAggregateUsageStats(final PluginCall call) {
         // I cannot use the primitive long here because it would create an NPE
@@ -85,6 +90,12 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
         }
     }
 
+    /**
+     * Queries the raw usage event log for {@code beginTime}..{@code endTime}.
+     * Returns lifecycle events only. Optional {@code packageName} filters the
+     * result; an empty string is rejected. Resolves {@code events: []} when
+     * Android returns null because the user is locked.
+     */
     @PluginMethod
     public void queryEvents(final PluginCall call) {
         final Long beginTime = call.getLong("beginTime");

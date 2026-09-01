@@ -75,6 +75,7 @@ npx cap sync
 <docgen-index>
 
 * [`queryAndAggregateUsageStats(...)`](#queryandaggregateusagestats)
+* [`queryUsageStats(...)`](#queryusagestats)
 * [`queryEvents(...)`](#queryevents)
 * [`isUsageStatsPermissionGranted()`](#isusagestatspermissiongranted)
 * [`openUsageStatsSettings()`](#openusagestatssettings)
@@ -101,7 +102,8 @@ Queries and aggregates usage stats for the given time range.
 Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
 every bucket that intersects `[beginTime, endTime)`, without clipping to it.
 `totalTimeInForeground` can therefore include usage from outside the window.
-Use `queryEvents` for timestamped lifecycle events in the requested range.
+Use `queryUsageStats` for the unmerged per-interval buckets, or `queryEvents`
+for timestamped lifecycle events in the requested range.
 
 | Param         | Type                                                            | Description                            |
 | ------------- | --------------------------------------------------------------- | -------------------------------------- |
@@ -110,6 +112,38 @@ Use `queryEvents` for timestamped lifecycle events in the requested range.
 **Returns:** <code>Promise&lt;<a href="#record">Record</a>&lt;string, <a href="#usagestats">UsageStats</a>&gt;&gt;</code>
 
 **Since:** 1.0.0
+
+--------------------
+
+
+### queryUsageStats(...)
+
+```typescript
+queryUsageStats(options: QueryUsageStatsOptions) => Promise<QueryUsageStatsResult>
+```
+
+Queries usage stats for the given interval type and time range.
+
+Wraps Android `UsageStatsManager.queryUsageStats`. Unlike
+`queryAndAggregateUsageStats`, this does not merge buckets: the result is
+one <a href="#usagestats">`UsageStats`</a> object per package per overlapping interval. Android may
+expand `[beginTime, endTime)` to the nearest whole interval period, so
+`totalTimeInForeground` can include usage from outside the window.
+
+On Android R (API 30) and above, the OS returns no data while the user is
+locked; this plugin then resolves `{ stats: [] }`, which must not be treated
+as zero foreground usage.
+
+This uses the same `PACKAGE_USAGE_STATS` permission as
+`queryAndAggregateUsageStats`.
+
+| Param         | Type                                                                      | Description                                                  |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **`options`** | <code><a href="#queryusagestatsoptions">QueryUsageStatsOptions</a></code> | - The interval type, time range, and optional package filter |
+
+**Returns:** <code>Promise&lt;<a href="#queryusagestatsresult">QueryUsageStatsResult</a>&gt;</code>
+
+**Since:** 8.1.3
 
 --------------------
 
@@ -250,6 +284,27 @@ Options for querying usage statistics.
 | **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time"                                                            |       |
 | **`endTime`**     | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"                                                                  |       |
 | **`packageName`** | <code>string</code> | Optional package name. When set, only stats for this package are returned. Omit to return stats for every package (previous behavior). An empty string is rejected. | 8.1.3 |
+
+
+#### QueryUsageStatsResult
+
+Result of a `queryUsageStats` call.
+
+| Prop        | Type                      | Description                                                                                                                                            |
+| ----------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`stats`** | <code>UsageStats[]</code> | Usage stats buckets in the requested range, ordered as returned by the OS. The same package can appear more than once when multiple intervals overlap. |
+
+
+#### QueryUsageStatsOptions
+
+Options for querying per-interval usage statistics.
+
+| Prop               | Type                | Description                                                                                                                                                                     |
+| ------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`intervalType`** | <code>number</code> | Interval type from `android.app.usage.UsageStatsManager`: - `0` — INTERVAL_DAILY - `1` — INTERVAL_WEEKLY - `2` — INTERVAL_MONTHLY - `3` — INTERVAL_YEARLY - `4` — INTERVAL_BEST |
+| **`beginTime`**    | <code>number</code> | The inclusive beginning of the range of stats to include in the results. Defined in terms of "Unix time"                                                                        |
+| **`endTime`**      | <code>number</code> | The exclusive end of the range of stats to include in the results. Defined in terms of "Unix time"                                                                              |
+| **`packageName`**  | <code>string</code> | Optional package name. When set, only stats for this package are returned. An empty string is rejected.                                                                         |
 
 
 #### QueryEventsResult

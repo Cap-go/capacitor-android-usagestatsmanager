@@ -98,7 +98,8 @@ export interface CapacitorUsageStatsManagerPlugin {
    * Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
    * every bucket that intersects `[beginTime, endTime)`, without clipping to it.
    * `totalTimeInForeground` can therefore include usage from outside the window.
-   * Use `queryEvents` for timestamped lifecycle events in the requested range.
+   * Use `queryUsageStats` for the unmerged per-interval buckets, or `queryEvents`
+   * for timestamped lifecycle events in the requested range.
    *
    * @param options - The time range options for the query
    * @returns Promise that resolves to a record of package names and their corresponding usage stats
@@ -120,6 +121,42 @@ export interface CapacitorUsageStatsManagerPlugin {
    * ```
    */
   queryAndAggregateUsageStats(options: UsageStatsOptions): Promise<Record<string, UsageStats>>;
+
+  /**
+   * Queries usage stats for the given interval type and time range.
+   *
+   * Wraps Android `UsageStatsManager.queryUsageStats`. Unlike
+   * `queryAndAggregateUsageStats`, this does not merge buckets: the result is
+   * one `UsageStats` object per package per overlapping interval. Android may
+   * expand `[beginTime, endTime)` to the nearest whole interval period, so
+   * `totalTimeInForeground` can include usage from outside the window.
+   *
+   * On Android R (API 30) and above, the OS returns no data while the user is
+   * locked; this plugin then resolves `{ stats: [] }`, which must not be treated
+   * as zero foreground usage.
+   *
+   * This uses the same `PACKAGE_USAGE_STATS` permission as
+   * `queryAndAggregateUsageStats`.
+   *
+   * @param options - The interval type, time range, and optional package filter
+   * @returns Promise that resolves to the matching usage stats buckets
+   * @throws Error if the permission is not granted or query fails
+   * @since 8.1.3
+   * @example
+   * ```typescript
+   * const startOfDay = new Date().setHours(0, 0, 0, 0);
+   * const { stats } = await UsageStatsManager.queryUsageStats({
+   *   intervalType: 0, // INTERVAL_DAILY
+   *   beginTime: startOfDay,
+   *   endTime: Date.now(),
+   *   packageName: 'com.example.app',
+   * });
+   * stats.forEach((bucket) => {
+   *   console.log(`${bucket.packageName}: ${bucket.totalTimeInForeground}ms`);
+   * });
+   * ```
+   */
+  queryUsageStats(options: QueryUsageStatsOptions): Promise<QueryUsageStatsResult>;
 
   /**
    * Queries the raw usage event log for the given time range.
@@ -228,6 +265,54 @@ export interface CapacitorUsageStatsManagerPlugin {
    * ```
    */
   getPluginVersion(): Promise<{ version: string }>;
+}
+
+/**
+ * Options for querying per-interval usage statistics.
+ *
+ * @since 8.1.3
+ */
+export interface QueryUsageStatsOptions {
+  /**
+   * Interval type from `android.app.usage.UsageStatsManager`:
+   * - `0` — INTERVAL_DAILY
+   * - `1` — INTERVAL_WEEKLY
+   * - `2` — INTERVAL_MONTHLY
+   * - `3` — INTERVAL_YEARLY
+   * - `4` — INTERVAL_BEST
+   */
+  intervalType: number;
+
+  /**
+   * The inclusive beginning of the range of stats to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  beginTime: number;
+
+  /**
+   * The exclusive end of the range of stats to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  endTime: number;
+
+  /**
+   * Optional package name. When set, only stats for this package are returned.
+   * An empty string is rejected.
+   */
+  packageName?: string;
+}
+
+/**
+ * Result of a `queryUsageStats` call.
+ *
+ * @since 8.1.3
+ */
+export interface QueryUsageStatsResult {
+  /**
+   * Usage stats buckets in the requested range, ordered as returned by the OS.
+   * The same package can appear more than once when multiple intervals overlap.
+   */
+  stats: UsageStats[];
 }
 
 /**

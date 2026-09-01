@@ -5,6 +5,8 @@ import type {
   PackageInfo,
   QueryEventsOptions,
   QueryEventsResult,
+  QueryUsageStatsOptions,
+  QueryUsageStatsResult,
 } from './definitions';
 
 export class CapacitorUsageStatsManagerWeb extends WebPlugin implements CapacitorUsageStatsManagerPlugin {
@@ -21,6 +23,15 @@ export class CapacitorUsageStatsManagerWeb extends WebPlugin implements Capacito
    * @returns Never; web always throws
    */
   queryAndAggregateUsageStats(_options: any): Promise<Record<string, any>> {
+    throw new Error('Method not implemented.');
+  }
+  /**
+   * Android-only. Web does not expose UsageStatsManager.
+   *
+   * @param _options Interval type, time range, and optional package filter
+   * @returns Never; web always throws
+   */
+  queryUsageStats(_options: QueryUsageStatsOptions): Promise<QueryUsageStatsResult> {
     throw new Error('Method not implemented.');
   }
   /**

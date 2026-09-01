@@ -170,16 +170,20 @@ user is locked; this plugin then resolves `{ events: [] }`, which likewise
 must not be treated as zero foreground usage.
 
 Callers can sum resumed-to-paused intervals from the returned events.
-This uses the same `PACKAGE_USAGE_STATS` permission as
+Do not treat `DEVICE_SHUTDOWN` as a pause: it is a reset marker, not an
+interval close. This uses the same `PACKAGE_USAGE_STATS` permission as
 `queryAndAggregateUsageStats`.
 
 Only lifecycle events are returned, to keep the bridge payload small:
 - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
 - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
 - `23` — ACTIVITY_STOPPED
-- `26` — DEVICE_SHUTDOWN (device-wide closer; still returned when
+- `26` — DEVICE_SHUTDOWN (device-wide reset marker; still returned when
   `packageName` is set. Android typically reports package `"android"`.
-  `packageName` is omitted if the OS does not attach one.)
+  `packageName` is omitted if the OS does not attach one. The timestamp
+  is the last <a href="#usagestats">UsageStats</a> persist before shutdown, not the actual
+  power-off. Open resume events without a matching pause between this
+  marker and the next boot have unknown duration and must be ignored.)
 
 | Param         | Type                                                              | Description                                  |
 | ------------- | ----------------------------------------------------------------- | -------------------------------------------- |
@@ -327,19 +331,19 @@ Represents a single usage event.
 `"android"`) and omitted otherwise. Other fields remain optional for
 compatibility.
 
-| Prop                        | Type                | Description                                                                                                                                                                                                                                               |
-| --------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`packageName`**           | <code>string</code> | Package name of the app. Omitted when Android does not attach a package. DEVICE_SHUTDOWN typically uses `"android"`.                                                                                                                                      |
-| **`className`**             | <code>string</code> | Class name (might be null)                                                                                                                                                                                                                                |
-| **`timeStamp`**             | <code>number</code> | Timestamp in milliseconds since epoch                                                                                                                                                                                                                     |
-| **`eventType`**             | <code>number</code> | Event type constant from `android.app.usage.UsageEvents.Event`. `queryEvents` returns lifecycle types only: - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND - `23` — ACTIVITY_STOPPED - `26` — DEVICE_SHUTDOWN |
-| **`configuration`**         | <code>any</code>    | Configuration object (requires API 28+)                                                                                                                                                                                                                   |
-| **`shortcutId`**            | <code>string</code> | Shortcut ID (requires API 28+)                                                                                                                                                                                                                            |
-| **`standbyBucket`**         | <code>number</code> | App standby bucket (requires API 28+)                                                                                                                                                                                                                     |
-| **`notificationChannelId`** | <code>string</code> | Notification channel ID (requires API 29+)                                                                                                                                                                                                                |
-| **`instanceId`**            | <code>number</code> | Instance ID (requires API 30+)                                                                                                                                                                                                                            |
-| **`taskRootPackageName`**   | <code>string</code> | Task root package name (requires API 31+)                                                                                                                                                                                                                 |
-| **`taskRootClassName`**     | <code>string</code> | Task root class name (requires API 31+)                                                                                                                                                                                                                   |
+| Prop                        | Type                | Description                                                                                                                                                                                                                                                                                     |
+| --------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`packageName`**           | <code>string</code> | Package name of the app. Omitted when Android does not attach a package. DEVICE_SHUTDOWN typically uses `"android"`.                                                                                                                                                                            |
+| **`className`**             | <code>string</code> | Class name (might be null)                                                                                                                                                                                                                                                                      |
+| **`timeStamp`**             | <code>number</code> | Timestamp in milliseconds since epoch                                                                                                                                                                                                                                                           |
+| **`eventType`**             | <code>number</code> | Event type constant from `android.app.usage.UsageEvents.Event`. `queryEvents` returns lifecycle types only: - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND - `23` — ACTIVITY_STOPPED - `26` — DEVICE_SHUTDOWN (reset marker, not an interval close) |
+| **`configuration`**         | <code>any</code>    | Configuration object (requires API 28+)                                                                                                                                                                                                                                                         |
+| **`shortcutId`**            | <code>string</code> | Shortcut ID (requires API 28+)                                                                                                                                                                                                                                                                  |
+| **`standbyBucket`**         | <code>number</code> | App standby bucket (requires API 28+)                                                                                                                                                                                                                                                           |
+| **`notificationChannelId`** | <code>string</code> | Notification channel ID (requires API 29+)                                                                                                                                                                                                                                                      |
+| **`instanceId`**            | <code>number</code> | Instance ID (requires API 30+)                                                                                                                                                                                                                                                                  |
+| **`taskRootPackageName`**   | <code>string</code> | Task root package name (requires API 31+)                                                                                                                                                                                                                                                       |
+| **`taskRootClassName`**     | <code>string</code> | Task root class name (requires API 31+)                                                                                                                                                                                                                                                         |
 
 
 #### QueryEventsOptions

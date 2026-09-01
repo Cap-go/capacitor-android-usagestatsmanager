@@ -182,7 +182,9 @@ export interface CapacitorUsageStatsManagerPlugin {
    * - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
    * - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
    * - `23` — ACTIVITY_STOPPED
-   * - `26` — DEVICE_SHUTDOWN
+   * - `26` — DEVICE_SHUTDOWN (device-wide closer; still returned when
+   *   `packageName` is set. Android typically reports package `"android"`.
+   *   `packageName` is omitted if the OS does not attach one.)
    *
    * @param options - The time range and optional package filter
    * @returns Promise that resolves to the matching usage events
@@ -334,9 +336,9 @@ export interface QueryEventsOptions {
   endTime: number;
 
   /**
-   * Optional package name. When set, only events for this package are returned.
+   * Optional package name. When set, only events for this package are returned,
+   * plus device-wide `DEVICE_SHUTDOWN` events. An empty string is rejected.
    * Keeps the Capacitor bridge payload small when you care about one app.
-   * An empty string is rejected.
    */
   packageName?: string;
 }
@@ -356,14 +358,20 @@ export interface QueryEventsResult {
 /**
  * Represents a single usage event.
  *
- * `queryEvents` currently populates `packageName`, `className`, `timeStamp`,
- * and `eventType`. Other fields remain optional for compatibility.
+ * `queryEvents` currently populates `className`, `timeStamp`, and `eventType`.
+ * `packageName` is set when Android attaches one (DEVICE_SHUTDOWN usually uses
+ * `"android"`) and omitted otherwise. Other fields remain optional for
+ * compatibility.
  *
  * @since 1.0.0
  */
 export interface UsageEvent {
-  /** Package name of the app */
-  packageName: string;
+  /**
+   * Package name of the app.
+   * Omitted when Android does not attach a package. DEVICE_SHUTDOWN typically
+   * uses `"android"`.
+   */
+  packageName?: string;
   /** Class name (might be null) */
   className?: string;
   /** Timestamp in milliseconds since epoch */

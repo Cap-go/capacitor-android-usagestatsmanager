@@ -177,7 +177,9 @@ Only lifecycle events are returned, to keep the bridge payload small:
 - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
 - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
 - `23` — ACTIVITY_STOPPED
-- `26` — DEVICE_SHUTDOWN
+- `26` — DEVICE_SHUTDOWN (device-wide closer; still returned when
+  `packageName` is set. Android typically reports package `"android"`.
+  `packageName` is omitted if the OS does not attach one.)
 
 | Param         | Type                                                              | Description                                  |
 | ------------- | ----------------------------------------------------------------- | -------------------------------------------- |
@@ -320,12 +322,14 @@ Result of a `queryEvents` call.
 
 Represents a single usage event.
 
-`queryEvents` currently populates `packageName`, `className`, `timeStamp`,
-and `eventType`. Other fields remain optional for compatibility.
+`queryEvents` currently populates `className`, `timeStamp`, and `eventType`.
+`packageName` is set when Android attaches one (DEVICE_SHUTDOWN usually uses
+`"android"`) and omitted otherwise. Other fields remain optional for
+compatibility.
 
 | Prop                        | Type                | Description                                                                                                                                                                                                                                               |
 | --------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`packageName`**           | <code>string</code> | Package name of the app                                                                                                                                                                                                                                   |
+| **`packageName`**           | <code>string</code> | Package name of the app. Omitted when Android does not attach a package. DEVICE_SHUTDOWN typically uses `"android"`.                                                                                                                                      |
 | **`className`**             | <code>string</code> | Class name (might be null)                                                                                                                                                                                                                                |
 | **`timeStamp`**             | <code>number</code> | Timestamp in milliseconds since epoch                                                                                                                                                                                                                     |
 | **`eventType`**             | <code>number</code> | Event type constant from `android.app.usage.UsageEvents.Event`. `queryEvents` returns lifecycle types only: - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND - `23` — ACTIVITY_STOPPED - `26` — DEVICE_SHUTDOWN |
@@ -342,11 +346,11 @@ and `eventType`. Other fields remain optional for compatibility.
 
 Options for querying the raw usage event log.
 
-| Prop              | Type                | Description                                                                                                                                                                    |
-| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of events to include in the results. Defined in terms of "Unix time"                                                                      |
-| **`endTime`**     | <code>number</code> | The exclusive end of the range of events to include in the results. Defined in terms of "Unix time"                                                                            |
-| **`packageName`** | <code>string</code> | Optional package name. When set, only events for this package are returned. Keeps the Capacitor bridge payload small when you care about one app. An empty string is rejected. |
+| Prop              | Type                | Description                                                                                                                                                                                                               |
+| ----------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`beginTime`**   | <code>number</code> | The inclusive beginning of the range of events to include in the results. Defined in terms of "Unix time"                                                                                                                 |
+| **`endTime`**     | <code>number</code> | The exclusive end of the range of events to include in the results. Defined in terms of "Unix time"                                                                                                                       |
+| **`packageName`** | <code>string</code> | Optional package name. When set, only events for this package are returned, plus device-wide `DEVICE_SHUTDOWN` events. An empty string is rejected. Keeps the Capacitor bridge payload small when you care about one app. |
 
 
 #### UsageStatsPermissionResult

@@ -183,7 +183,8 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
     /**
      * Queries the raw usage event log for {@code beginTime}..{@code endTime}.
      * Returns lifecycle events only. Optional {@code packageName} filters the
-     * result; an empty string is rejected. Resolves {@code events: []} when
+     * result; an empty string is rejected. {@code DEVICE_SHUTDOWN} is always
+     * included because it is device-wide. Resolves {@code events: []} when
      * Android returns null because the user is locked.
      *
      * @param call Capacitor plugin call with beginTime, endTime, and optional packageName
@@ -230,14 +231,6 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             while (events.hasNextEvent()) {
                 events.getNextEvent(event);
 
-                final String eventPackage = event.getPackageName();
-                if (eventPackage == null) {
-                    continue;
-                }
-                if (packageFilter != null && !packageFilter.equals(eventPackage)) {
-                    continue;
-                }
-
                 final int type = event.getEventType();
                 // ACTIVITY_RESUMED/PAUSED share values with pre-API-29 MOVE_TO_FOREGROUND/BACKGROUND (1/2).
                 if (
@@ -249,8 +242,22 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
                     continue;
                 }
 
+                final String eventPackage = event.getPackageName();
+                // DEVICE_SHUTDOWN is device-wide. Android usually sets package "android";
+                // keep it even when filtering to one app so callers can close open sessions.
+                if (type != UsageEvents.Event.DEVICE_SHUTDOWN) {
+                    if (eventPackage == null) {
+                        continue;
+                    }
+                    if (packageFilter != null && !packageFilter.equals(eventPackage)) {
+                        continue;
+                    }
+                }
+
                 final JSObject e = new JSObject();
-                e.put("packageName", eventPackage);
+                if (eventPackage != null) {
+                    e.put("packageName", eventPackage);
+                }
                 final String className = event.getClassName();
                 if (className != null) {
                     e.put("className", className);

@@ -63,6 +63,15 @@ export interface UsageStatsOptions {
    * Defined in terms of "Unix time"
    */
   endTime: number;
+
+  /**
+   * Optional package name. When set, only stats for this package are returned.
+   * Omit to return stats for every package (previous behavior).
+   * An empty string is rejected.
+   *
+   * @since 8.1.3
+   */
+  packageName?: string;
 }
 
 /**
@@ -86,6 +95,12 @@ export interface CapacitorUsageStatsManagerPlugin {
   /**
    * Queries and aggregates usage stats for the given time range.
    *
+   * Android reads pre-aggregated daily/weekly/monthly/yearly buckets and sums
+   * every bucket that intersects `[beginTime, endTime)`, without clipping to it.
+   * `totalTimeInForeground` can therefore include usage from outside the window.
+   * Use `queryUsageStats` for the unmerged per-interval buckets, or `queryEvents`
+   * for timestamped lifecycle events in the requested range.
+   *
    * @param options - The time range options for the query
    * @returns Promise that resolves to a record of package names and their corresponding usage stats
    * @throws Error if the permission is not granted or query fails
@@ -96,7 +111,8 @@ export interface CapacitorUsageStatsManagerPlugin {
    * const now = Date.now();
    * const stats = await UsageStatsManager.queryAndAggregateUsageStats({
    *   beginTime: oneDayAgo,
-   *   endTime: now
+   *   endTime: now,
+   *   packageName: 'com.example.app',
    * });
    *
    * for (const [packageName, usageData] of Object.entries(stats)) {
@@ -105,6 +121,93 @@ export interface CapacitorUsageStatsManagerPlugin {
    * ```
    */
   queryAndAggregateUsageStats(options: UsageStatsOptions): Promise<Record<string, UsageStats>>;
+
+  /**
+   * Queries usage stats for the given interval type and time range.
+   *
+   * Wraps Android `UsageStatsManager.queryUsageStats`. Unlike
+   * `queryAndAggregateUsageStats`, this does not merge buckets: the result is
+   * one `UsageStats` object per package per overlapping interval. Android may
+   * expand `[beginTime, endTime)` to the nearest whole interval period, so
+   * `totalTimeInForeground` can include usage from outside the window.
+   *
+   * On Android R (API 30) and above, the OS returns no data while the user is
+   * locked; this plugin then resolves `{ stats: [] }`, which must not be treated
+   * as zero foreground usage.
+   *
+   * This uses the same `PACKAGE_USAGE_STATS` permission as
+   * `queryAndAggregateUsageStats`.
+   *
+   * @param options - The interval type, time range, and optional package filter
+   * @returns Promise that resolves to the matching usage stats buckets
+   * @throws Error if the permission is not granted or query fails
+   * @since 8.1.3
+   * @example
+   * ```typescript
+   * const startOfDay = new Date().setHours(0, 0, 0, 0);
+   * const { stats } = await UsageStatsManager.queryUsageStats({
+   *   intervalType: 0, // INTERVAL_DAILY
+   *   beginTime: startOfDay,
+   *   endTime: Date.now(),
+   *   packageName: 'com.example.app',
+   * });
+   * stats.forEach((bucket) => {
+   *   console.log(`${bucket.packageName}: ${bucket.totalTimeInForeground}ms`);
+   * });
+   * ```
+   */
+  queryUsageStats(options: QueryUsageStatsOptions): Promise<QueryUsageStatsResult>;
+
+  /**
+   * Queries the raw usage event log for the given time range.
+   *
+   * Returns lifecycle events whose timestamps fall in `[beginTime, endTime)`.
+   * Android does not emit a synthetic event for "already in foreground at
+   * beginTime" or "still in foreground at endTime". To measure duration across
+   * those boundaries, pass an earlier `beginTime` as lookback and clip locally:
+   * treat an unmatched pause as starting at the window start, and an unmatched
+   * resume as ending at the window end.
+   *
+   * Android retains events for only a few days. Older ranges may return an
+   * incomplete or empty list; that is not the same as zero foreground usage.
+   * On Android R (API 30) and above, the OS also returns no events while the
+   * user is locked; this plugin then resolves `{ events: [] }`, which likewise
+   * must not be treated as zero foreground usage.
+   *
+   * Callers can sum resumed-to-paused intervals from the returned events.
+   * Do not treat `DEVICE_SHUTDOWN` as a pause: it is a reset marker, not an
+   * interval close. This uses the same `PACKAGE_USAGE_STATS` permission as
+   * `queryAndAggregateUsageStats`.
+   *
+   * Only lifecycle events are returned, to keep the bridge payload small:
+   * - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+   * - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+   * - `23` — ACTIVITY_STOPPED
+   * - `26` — DEVICE_SHUTDOWN (device-wide reset marker; still returned when
+   *   `packageName` is set. Android typically reports package `"android"`.
+   *   `packageName` is omitted if the OS does not attach one. The timestamp
+   *   is the last UsageStats persist before shutdown, not the actual
+   *   power-off. Open resume events without a matching pause between this
+   *   marker and the next boot have unknown duration and must be ignored.)
+   *
+   * @param options - The time range and optional package filter
+   * @returns Promise that resolves to the matching usage events
+   * @throws Error if the permission is not granted or query fails
+   * @since 8.1.3
+   * @example
+   * ```typescript
+   * const startOfDay = new Date().setHours(0, 0, 0, 0);
+   * const { events } = await UsageStatsManager.queryEvents({
+   *   beginTime: startOfDay,
+   *   endTime: Date.now(),
+   *   packageName: 'com.example.app',
+   * });
+   * events.forEach((event) => {
+   *   console.log(`${event.packageName} type=${event.eventType} at ${event.timeStamp}`);
+   * });
+   * ```
+   */
+  queryEvents(options: QueryEventsOptions): Promise<QueryEventsResult>;
 
   /**
    * Checks if the usage stats permission is granted.
@@ -171,18 +274,120 @@ export interface CapacitorUsageStatsManagerPlugin {
 }
 
 /**
+ * Options for querying per-interval usage statistics.
+ *
+ * @since 8.1.3
+ */
+export interface QueryUsageStatsOptions {
+  /**
+   * Interval type from `android.app.usage.UsageStatsManager`:
+   * - `0` — INTERVAL_DAILY
+   * - `1` — INTERVAL_WEEKLY
+   * - `2` — INTERVAL_MONTHLY
+   * - `3` — INTERVAL_YEARLY
+   * - `4` — INTERVAL_BEST
+   */
+  intervalType: number;
+
+  /**
+   * The inclusive beginning of the range of stats to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  beginTime: number;
+
+  /**
+   * The exclusive end of the range of stats to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  endTime: number;
+
+  /**
+   * Optional package name. When set, only stats for this package are returned.
+   * An empty string is rejected.
+   */
+  packageName?: string;
+}
+
+/**
+ * Result of a `queryUsageStats` call.
+ *
+ * @since 8.1.3
+ */
+export interface QueryUsageStatsResult {
+  /**
+   * Usage stats buckets in the requested range, ordered as returned by the OS.
+   * The same package can appear more than once when multiple intervals overlap.
+   */
+  stats: UsageStats[];
+}
+
+/**
+ * Options for querying the raw usage event log.
+ *
+ * @since 8.1.3
+ */
+export interface QueryEventsOptions {
+  /**
+   * The inclusive beginning of the range of events to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  beginTime: number;
+
+  /**
+   * The exclusive end of the range of events to include in the results.
+   * Defined in terms of "Unix time"
+   */
+  endTime: number;
+
+  /**
+   * Optional package name. When set, only events for this package are returned,
+   * plus device-wide `DEVICE_SHUTDOWN` events. An empty string is rejected.
+   * Keeps the Capacitor bridge payload small when you care about one app.
+   */
+  packageName?: string;
+}
+
+/**
+ * Result of a `queryEvents` call.
+ *
+ * @since 8.1.3
+ */
+export interface QueryEventsResult {
+  /**
+   * Lifecycle usage events in the requested range, ordered as returned by the OS.
+   */
+  events: UsageEvent[];
+}
+
+/**
  * Represents a single usage event.
+ *
+ * `queryEvents` currently populates `className`, `timeStamp`, and `eventType`.
+ * `packageName` is set when Android attaches one (DEVICE_SHUTDOWN usually uses
+ * `"android"`) and omitted otherwise. Other fields remain optional for
+ * compatibility.
  *
  * @since 1.0.0
  */
 export interface UsageEvent {
-  /** Package name of the app */
-  packageName: string;
+  /**
+   * Package name of the app.
+   * Omitted when Android does not attach a package. DEVICE_SHUTDOWN typically
+   * uses `"android"`.
+   */
+  packageName?: string;
   /** Class name (might be null) */
   className?: string;
   /** Timestamp in milliseconds since epoch */
   timeStamp: number;
-  /** Event type constant (e.g., MOVE_TO_FOREGROUND, MOVE_TO_BACKGROUND) */
+  /**
+   * Event type constant from `android.app.usage.UsageEvents.Event`.
+   * `queryEvents` returns lifecycle types only:
+   * - `1` — ACTIVITY_RESUMED / MOVE_TO_FOREGROUND
+   * - `2` — ACTIVITY_PAUSED / MOVE_TO_BACKGROUND
+   * - `23` — ACTIVITY_STOPPED
+   * - `26` — DEVICE_SHUTDOWN (reset marker, not an interval close)
+   */
   eventType: number;
   /** Configuration object (requires API 28+) */
   configuration?: any;

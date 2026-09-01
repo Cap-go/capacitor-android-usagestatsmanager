@@ -1,6 +1,7 @@
 package ee.forgr.capacitor_android_usagestatsmanager;
 
 import android.app.AppOpsManager;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -17,6 +18,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import androidx.annotation.NonNull;
+import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -33,6 +35,13 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
     private final String pluginVersion = "8.1.2";
 
+    /**
+     * Queries and aggregates usage stats for the given time range.
+     * Optional {@code packageName} limits the result to one package; an empty
+     * string is rejected. Omit the field to return every package.
+     *
+     * @param call Capacitor plugin call with beginTime, endTime, and optional packageName
+     */
     @PluginMethod
     public void queryAndAggregateUsageStats(final PluginCall call) {
         // I cannot use the primitive long here because it would create an NPE
@@ -54,13 +63,23 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             return;
         }
 
+        // optional filter, avoids pushing every app's stats through the bridge
+        final String packageFilter = call.getString("packageName");
+        if (packageFilter != null && packageFilter.isEmpty()) {
+            call.reject("packageName is empty");
+            return;
+        }
+
         try {
             final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
             final Map<String, UsageStats> response = usageStatsManager.queryAndAggregateUsageStats(beginTime, endTime);
             final JSObject finalResponse = new JSObject();
             for (final Map.Entry<String, UsageStats> stat : response.entrySet()) {
                 final String key = stat.getKey();
-                final JSObject encodedValue = getJsObject(stat);
+                if (packageFilter != null && !packageFilter.equals(key)) {
+                    continue;
+                }
+                final JSObject encodedValue = getJsObject(stat.getValue());
                 finalResponse.put(key, encodedValue);
             }
             call.resolve(finalResponse);
@@ -70,6 +89,193 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
             PrintWriter pw = new PrintWriter(sw);
             t.printStackTrace(pw);
             call.reject("Error during fetching stats: " + sw);
+        }
+    }
+
+    /**
+     * Queries usage stats for the given interval type and time range.
+     * Optional {@code packageName} limits the result to one package; an empty
+     * string is rejected. Resolves {@code stats: []} when Android returns null
+     * because the user is locked.
+     *
+     * @param call Capacitor plugin call with intervalType, beginTime, endTime,
+     *     and optional packageName
+     */
+    @PluginMethod
+    public void queryUsageStats(final PluginCall call) {
+        final Integer intervalType = call.getInt("intervalType");
+        if (intervalType == null) {
+            call.reject("intervalType is null");
+            return;
+        }
+        if (
+            intervalType != UsageStatsManager.INTERVAL_DAILY &&
+            intervalType != UsageStatsManager.INTERVAL_WEEKLY &&
+            intervalType != UsageStatsManager.INTERVAL_MONTHLY &&
+            intervalType != UsageStatsManager.INTERVAL_YEARLY &&
+            intervalType != UsageStatsManager.INTERVAL_BEST
+        ) {
+            call.reject("intervalType is invalid");
+            return;
+        }
+
+        final Long beginTime = call.getLong("beginTime");
+        if (beginTime == null) {
+            call.reject("beginTime is null");
+            return;
+        }
+
+        final Long endTime = call.getLong("endTime");
+        if (endTime == null) {
+            call.reject("endTime is null");
+            return;
+        }
+
+        if (!this.checkUsageStatsPermission(this.getContext())) {
+            call.reject("Not allowed to query usage stats");
+            return;
+        }
+
+        final String packageFilter = call.getString("packageName");
+        if (packageFilter != null && packageFilter.isEmpty()) {
+            call.reject("packageName is empty");
+            return;
+        }
+
+        try {
+            final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
+            final List<UsageStats> usageStats = usageStatsManager.queryUsageStats(intervalType, beginTime, endTime);
+            if (usageStats == null) {
+                // Android R+: queryUsageStats returns null when the user is locked.
+                final JSObject ret = new JSObject();
+                ret.put("stats", new JSArray());
+                call.resolve(ret);
+                return;
+            }
+
+            final JSArray result = new JSArray();
+            for (final UsageStats stat : usageStats) {
+                if (stat == null) {
+                    continue;
+                }
+                final String packageName = stat.getPackageName();
+                if (packageName == null) {
+                    continue;
+                }
+                if (packageFilter != null && !packageFilter.equals(packageName)) {
+                    continue;
+                }
+                result.put(getJsObject(stat));
+            }
+
+            final JSObject ret = new JSObject();
+            ret.put("stats", result);
+            call.resolve(ret);
+        } catch (Throwable t) {
+            Log.e("CapacitorUsageStatsManager", "Error during queryUsageStats", t);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            call.reject("Error during queryUsageStats: " + sw);
+        }
+    }
+
+    /**
+     * Queries the raw usage event log for {@code beginTime}..{@code endTime}.
+     * Returns lifecycle events only. Optional {@code packageName} filters the
+     * result; an empty string is rejected. {@code DEVICE_SHUTDOWN} is always
+     * included because it is a device-wide reset marker. Resolves {@code events: []} when
+     * Android returns null because the user is locked.
+     *
+     * @param call Capacitor plugin call with beginTime, endTime, and optional packageName
+     */
+    @PluginMethod
+    public void queryEvents(final PluginCall call) {
+        final Long beginTime = call.getLong("beginTime");
+        if (beginTime == null) {
+            call.reject("beginTime is null");
+            return;
+        }
+
+        final Long endTime = call.getLong("endTime");
+        if (endTime == null) {
+            call.reject("endTime is null");
+            return;
+        }
+
+        if (!this.checkUsageStatsPermission(this.getContext())) {
+            call.reject("Not allowed to query usage stats");
+            return;
+        }
+
+        // optional filter, avoids pushing every app's events through the bridge
+        final String packageFilter = call.getString("packageName");
+        if (packageFilter != null && packageFilter.isEmpty()) {
+            call.reject("packageName is empty");
+            return;
+        }
+
+        try {
+            final UsageStatsManager usageStatsManager = (UsageStatsManager) this.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
+            final UsageEvents events = usageStatsManager.queryEvents(beginTime, endTime);
+            if (events == null) {
+                // Android R+: queryEvents returns null when the user is locked.
+                final JSObject ret = new JSObject();
+                ret.put("events", new JSArray());
+                call.resolve(ret);
+                return;
+            }
+            final UsageEvents.Event event = new UsageEvents.Event();
+            final JSArray result = new JSArray();
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event);
+
+                final int type = event.getEventType();
+                // ACTIVITY_RESUMED/PAUSED share values with pre-API-29 MOVE_TO_FOREGROUND/BACKGROUND (1/2).
+                if (
+                    type != UsageEvents.Event.ACTIVITY_RESUMED &&
+                    type != UsageEvents.Event.ACTIVITY_PAUSED &&
+                    type != UsageEvents.Event.ACTIVITY_STOPPED &&
+                    type != UsageEvents.Event.DEVICE_SHUTDOWN
+                ) {
+                    continue;
+                }
+
+                final String eventPackage = event.getPackageName();
+                // DEVICE_SHUTDOWN is a device-wide reset marker. Android usually sets
+                // package "android"; keep it even when filtering to one app.
+                if (type != UsageEvents.Event.DEVICE_SHUTDOWN) {
+                    if (eventPackage == null) {
+                        continue;
+                    }
+                    if (packageFilter != null && !packageFilter.equals(eventPackage)) {
+                        continue;
+                    }
+                }
+
+                final JSObject e = new JSObject();
+                if (eventPackage != null) {
+                    e.put("packageName", eventPackage);
+                }
+                final String className = event.getClassName();
+                if (className != null) {
+                    e.put("className", className);
+                }
+                e.put("timeStamp", event.getTimeStamp());
+                e.put("eventType", type);
+                result.put(e);
+            }
+
+            final JSObject ret = new JSObject();
+            ret.put("events", result);
+            call.resolve(ret);
+        } catch (Throwable t) {
+            Log.e("CapacitorUsageStatsManager", "Error during queryEvents", t);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            call.reject("Error during queryEvents: " + sw);
         }
     }
 
@@ -181,8 +387,7 @@ public class CapacitorUsageStatsManagerPlugin extends Plugin {
     }
 
     @NonNull
-    private static JSObject getJsObject(Map.Entry<String, UsageStats> stat) {
-        final UsageStats value = stat.getValue();
+    private static JSObject getJsObject(final UsageStats value) {
         final JSObject encodedValue = new JSObject();
 
         encodedValue.put("firstTimeStamp", value.getFirstTimeStamp());

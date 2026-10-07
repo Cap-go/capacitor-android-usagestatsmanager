@@ -1,10 +1,28 @@
 # @capgo/capacitor-android-usagestatsmanager
-<a href="https://capgo.app/"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-android-usagestatsmanager" alt="Capgo - Instant updates for Capacitor" /></a>
+
+Read Android app usage statistics from your Capacitor app with the `UsageStatsManager` API: screen time per app, usage intervals and raw usage events. Built for digital wellbeing, parental control and analytics apps.
+
+<a href="https://capgo.app/?ref=plugin_android_usagestatsmanager"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-android-usagestatsmanager" alt="Capgo - Instant updates for Capacitor" /></a>
 
 <div align="center">
-  <h2><a href="https://capgo.app/?ref=plugin_android_usagestatsmanager"> ➡️ Get Instant updates for your App with Capgo</a></h2>
-  <h2><a href="https://capgo.app/consulting/?ref=plugin_android_usagestatsmanager"> Missing a feature? We’ll build the plugin for you 💪</a></h2>
+  <p><b>Capgo</b>: open-source live updates for Ionic and Capacitor apps. Ship OTA fixes and features instantly, without waiting for app store review.</p>
+  <h2><a href="https://capgo.app/register/?ref=plugin_android_usagestatsmanager">➡️ Get started for free</a></h2>
+  <p>14-day unlimited free trial. No credit card required</p>
+  <p><a href="https://capgo.app/consulting/?ref=plugin_android_usagestatsmanager">Missing a feature? We'll build the plugin for you 💪</a></p>
 </div>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Cap-go/capacitor-android-usagestatsmanager/main/assets/github-social-preview.png" alt="@capgo/capacitor-android-usagestatsmanager for Capacitor apps" width="300" />
+</p>
+
+## Key features
+
+- **Aggregated usage**: `queryAndAggregateUsageStats()` returns per-app usage for a time range.
+- **Interval stats**: `queryUsageStats()` returns stats for daily, weekly, monthly or yearly intervals.
+- **Raw events**: `queryEvents()` reads the usage event log for a time range.
+- **Installed apps**: `queryAllPackages()` lists packages installed on the device.
+- **Permission helpers**: `isUsageStatsPermissionGranted()` and `openUsageStatsSettings()` guide users to grant usage access.
+- **Platforms**: Android. Android only. Web methods throw.
 
 ## Description
 Exposes the Android's UsageStatsManager SDK to Capacitor

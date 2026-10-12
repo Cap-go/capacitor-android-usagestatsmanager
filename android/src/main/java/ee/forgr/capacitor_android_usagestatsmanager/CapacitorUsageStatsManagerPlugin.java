@@ -33,7 +33,7 @@ import java.util.Map;
 @CapacitorPlugin(name = "CapacitorUsageStatsManager")
 public class CapacitorUsageStatsManagerPlugin extends Plugin {
 
-    private final String pluginVersion = "8.2.9";
+    private final String pluginVersion = "8.2.10";
 
     /**
      * Queries and aggregates usage stats for the given time range.

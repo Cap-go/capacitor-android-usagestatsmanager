@@ -2,7 +2,7 @@
 
 Read Android app usage statistics from your Capacitor app with the `UsageStatsManager` API: screen time per app, usage intervals and raw usage events. Built for digital wellbeing, parental control and analytics apps.
 
-<a href="https://capgo.app/?ref=plugin_android_usagestatsmanager"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-android-usagestatsmanager" alt="Capgo - Instant updates for Capacitor" /></a>
+<a href="https://capgo.app/?ref=plugin_android_usagestatsmanager"><img src="https://capgo.app/readme-banner.svg?repo=Cap-go/capacitor-android-usagestatsmanager" alt="Capgo - Build Capacitor apps with AI, ship updates instantly" /></a>
 
 <div align="center">
   <p><b>Capgo</b>: push fixes to your Capacitor users in minutes, build signed iOS and Android apps without a Mac, and roll back in one click.</p>
@@ -10,6 +10,8 @@ Read Android app usage statistics from your Capacitor app with the `UsageStatsMa
   <p>14-day unlimited free trial. No credit card required</p>
   <p><a href="https://capgo.app/consulting/?ref=plugin_android_usagestatsmanager">Missing a feature? We'll build the plugin for you 💪</a></p>
 </div>
+
+> 🤖 **Building with an AI coding agent?** Install [Capgo skills](https://capgo.app/skills/?ref=plugin_android_usagestatsmanager) so Claude Code, Codex, Cursor, Copilot, or Gemini CLI know how to install and use `@capgo/capacitor-android-usagestatsmanager` in your Capacitor app: `npx skills add Cap-go/capgo-skills`. Then ask your agent: *"Add @capgo/capacitor-android-usagestatsmanager to my Capacitor app and wire it up."* [Agent setup guides](https://capgo.app/agents/?ref=plugin_android_usagestatsmanager) · [Hosted MCP](https://capgo.app/docs/ai/mcp/?ref=plugin_android_usagestatsmanager)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Cap-go/capacitor-android-usagestatsmanager/main/assets/github-social-preview.png" alt="@capgo/capacitor-android-usagestatsmanager for Capacitor apps" width="300" />
